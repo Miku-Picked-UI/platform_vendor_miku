@@ -1,0 +1,34 @@
+//
+// Copyright (C) 2026 The PenguinOS Project
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// PenguinDex from PenguinOS (github.com/Project-PenguinOS/penguin_packages_apps_PenguinDex,
+// branch celerity), switched from Penguin Laboratory's DeX page. Miku-Picked UI changes: none in
+// the app; the framework gives Android 16 the hidden InputManager.createVirtualMouse the touchpad
+// uses (Android 17 has it as a system API).
+
+android_app {
+    name: "PenguinDex",
+    srcs: ["src/**/*.kt"],
+    resource_dirs: ["res"],
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    static_libs: ["kotlin-stdlib"],
+    optimize: {
+        enabled: false,
+    },
+}
+
+// DeX's look for the launcher on a connected screen: its dock and Launchpad. Launcher3 calls
+// into it from a few hooks.
+android_library {
+    name: "PenguinDexLauncher",
+    srcs: ["launcher/src/**/*.kt"],
+    resource_dirs: ["launcher/res"],
+    manifest: "launcher/AndroidManifest.xml",
+    platform_apis: true,
+    min_sdk_version: "current",
+}

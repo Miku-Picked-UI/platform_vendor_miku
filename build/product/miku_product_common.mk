@@ -106,6 +106,11 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     PenguinLaboratory
 
+# [PenguinOS] PenguinDex (picked/penguin_dex): DeX's touchpad and Control Centre; its dock and
+# Launchpad are built into Launcher3 (PenguinDexLauncher)
+PRODUCT_PACKAGES += \
+    PenguinDex
+
 # [Miku-Picked UI] AirPods controls in Settings' device details (picked/airpods, GPL-3.0,
 # protocol from LibrePods)
 PRODUCT_PACKAGES += \
