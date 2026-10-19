@@ -58,6 +58,7 @@ endif
 PRODUCT_PACKAGES += \
     Gboard \
     LiveWallpapersPicker \
+    MikuHome \
     MikuSettings \
     MikuSystemUI \
     MUBB \
