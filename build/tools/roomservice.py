@@ -45,6 +45,12 @@ DEBUG = False
 custom_local_manifest = ".repo/local_manifests/diva.xml"
 custom_default_revision =  os.getenv('ROOMSERVICE_DEFAULT_BRANCH', 'Blooming_v2')
 custom_dependencies = "miku.dependencies"
+# LineageOS 23.2 device trees ship lineage.dependencies instead; they are
+# resolved against the LineageOS remote (snippets/lineage.xml).
+lineage_dependencies = "lineage.dependencies"
+lineage_remote = "lineage"
+lineage_org_display = "LineageOS"
+lineage_default_revision = os.getenv('ROOMSERVICE_LINEAGE_BRANCH', 'lineage-23.2')
 org_manifest = "diva"  # leave empty if org is provided in manifest
 org_display = "Diva-Room"  # needed for displaying
 
@@ -102,11 +108,26 @@ def load_manifest(manifest):
     return man
 
 def get_from_manifest(device_name):
-    if os.path.exists(custom_local_manifest):
-        man = load_manifest(custom_local_manifest)
+    # Look through every local manifest, not only ours, so device trees
+    # added by hand (e.g. a LineageOS roomservice.xml) are found too.
+    manifests = [custom_local_manifest]
+    if os.path.isdir(local_manifests):
+        manifests += sorted(os.path.join(local_manifests, f)
+                            for f in os.listdir(local_manifests)
+                            if f.endswith(".xml"))
+    for manifest in manifests:
+        if not os.path.exists(manifest):
+            continue
+        man = load_manifest(manifest)
         for local_path in man.findall("project"):
             lp = local_path.get("path").strip('/')
             if lp.startswith("device/") and lp.endswith("/" + device_name):
+                return lp
+    # Fall back to a device tree that is already checked out.
+    if os.path.isdir("device"):
+        for manufacturer in sorted(os.listdir("device")):
+            lp = "device/%s/%s" % (manufacturer, device_name)
+            if os.path.isdir(lp):
                 return lp
     return None
 
@@ -186,9 +207,21 @@ def fetch_dependencies(repo_path, fallback_branch=None):
     print('Looking for dependencies')
 
     dep_p = '/'.join((repo_path, custom_dependencies))
+    lineage_dep_p = '/'.join((repo_path, lineage_dependencies))
     if os.path.exists(dep_p):
         with open(dep_p) as dep_f:
             dependencies = json.load(dep_f)
+    elif os.path.exists(lineage_dep_p):
+        # LineageOS device tree: unqualified repositories live in the
+        # LineageOS org and default to the lineage-23.2 branch.
+        with open(lineage_dep_p) as dep_f:
+            dependencies = json.load(dep_f)
+        for dependency in dependencies:
+            if 'remote' not in dependency and "/" not in dependency['repository']:
+                dependency['remote'] = lineage_remote
+            if not dependency.get('branch'):
+                dependency['branch'] = lineage_default_revision
+        fallback_branch = fallback_branch or lineage_default_revision
     else:
         dependencies = {}
         print('%s has no additional dependencies.' % repo_path)
@@ -215,7 +248,7 @@ def fetch_dependencies(repo_path, fallback_branch=None):
         os.system('repo sync --force-sync --no-tags --current-branch --no-clone-bundle %s' % ' '.join(syncable_repos))
 
     for deprepo in syncable_repos:
-        fetch_dependencies(deprepo)
+        fetch_dependencies(deprepo, fallback_branch)
 
 
 def has_branch(branches, revision):
@@ -242,6 +275,52 @@ def detect_revision(repo):
     sys.exit()
 
 
+def fetch_lineage_device(device):
+    """Retrieve an official LineageOS 23.2 device tree (android_device_<oem>_<device>)."""
+    print("Device {0} not found. Attempting to retrieve device repository from "
+          "{1} Github (http://github.com/{1}).".format(device, lineage_org_display))
+
+    githubreq = urllib.request.Request(
+        "https://api.github.com/search/repositories?"
+        "q={0}+user:{1}+in:name+fork:true".format(device, lineage_org_display))
+    add_auth(githubreq)
+    try:
+        result = json.loads(urllib.request.urlopen(githubreq).read().decode())
+    except urllib.error.URLError:
+        print("Failed to search GitHub")
+        sys.exit(1)
+    except ValueError:
+        print("Failed to parse return data from GitHub")
+        sys.exit(1)
+
+    for repository in result.get('items', []):
+        repo_name = repository['name']
+        if not (repo_name.startswith("android_device_") and
+                repo_name.endswith("_" + device)):
+            continue
+        print("Found repository: %s" % repo_name)
+
+        manufacturer = repo_name[len("android_device_"):-(len(device) + 1)]
+        repo_path = "device/%s/%s" % (manufacturer, device)
+        adding = [{'repository': repo_name, 'target_path': repo_path,
+                   'remote': lineage_remote, 'branch': lineage_default_revision}]
+
+        add_to_manifest(adding, lineage_default_revision)
+
+        print("Syncing repository to retrieve project.")
+        os.system('repo sync --force-sync --no-tags --current-branch --no-clone-bundle %s' % repo_path)
+        print("Repository synced!")
+
+        fetch_dependencies(repo_path, lineage_default_revision)
+        print("Done")
+        return
+
+    print("Repository for %s not found in the %s Github repository list."
+          % (device, lineage_org_display))
+    print("If this is in error, you may need to manually add it to your "
+          "%s" % custom_local_manifest)
+
+
 def main():
     global DEBUG
     try:
@@ -262,6 +341,10 @@ def main():
         else:
             print("Trying dependencies-only mode on a "
                   "non-existing device tree?")
+        sys.exit()
+
+    if product.startswith("lineage_"):
+        fetch_lineage_device(device)
         sys.exit()
 
     print("Device {0} not found. Attempting to retrieve device repository from "
