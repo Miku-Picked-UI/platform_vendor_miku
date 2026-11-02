@@ -3,6 +3,7 @@
 # Copyright (C) 2020 Raphielscape LLC. and Haruka LLC.
 # Copyright (C) 2020 StormbreakerOSS
 # Copyright (C) 2021-2023 Miku UI
+# Copyright (C) 2026 Miku-Picked UI
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +17,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+# Miku-Picked UI: Miku UI A16 + cherry-picked features from
+# Infinity X, AxionOS, uwuAOSP and Evolution X.
+MIKU_ROM_NAME := Miku-Picked UI
 
 PLATFORM_MIKU_RELEASE := Blooming
 PLATFORM_MIKU_VERSION := $(PLATFORM_MIKU_RELEASE).$(shell date +%y%m%d%H)
@@ -31,14 +36,14 @@ endif
 
 ifeq ($(TARGET_MIKU_BUILD_VARIANT),OFFICIAL)
     PLATFORM_MIKU_VERSION := $(PLATFORM_MIKU_RELEASE)
-    PROD_VERSION += MikuUI-$(PLATFORM_MIKU_VERSION)-$(TARGET_DEVICE)-$(shell date +%y%m%d%H)-$(MIKU_TYPE)OFFICIAL
+    PROD_VERSION += MikuPickedUI-$(PLATFORM_MIKU_VERSION)-$(TARGET_DEVICE)-$(shell date +%y%m%d%H)-$(MIKU_TYPE)OFFICIAL
 else ifeq ($(TARGET_MIKU_BUILD_VARIANT),COMMUNITY)
     PLATFORM_MIKU_VERSION := $(PLATFORM_MIKU_RELEASE)
-    PROD_VERSION += MikuUI-$(PLATFORM_MIKU_VERSION)-$(TARGET_DEVICE)-$(shell date +%y%m%d%H)-$(MIKU_TYPE)COMMUNITY
+    PROD_VERSION += MikuPickedUI-$(PLATFORM_MIKU_VERSION)-$(TARGET_DEVICE)-$(shell date +%y%m%d%H)-$(MIKU_TYPE)COMMUNITY
 else
     PLATFORM_MIKU_VERSION := $(PLATFORM_MIKU_RELEASE)
     TARGET_MIKU_BUILD_VARIANT := UNOFFICIAL
-    PROD_VERSION += MikuUI-$(PLATFORM_MIKU_VERSION)-$(TARGET_DEVICE)-$(shell date +%y%m%d%H)-$(MIKU_TYPE)UNOFFICIAL
+    PROD_VERSION += MikuPickedUI-$(PLATFORM_MIKU_VERSION)-$(TARGET_DEVICE)-$(shell date +%y%m%d%H)-$(MIKU_TYPE)UNOFFICIAL
 endif
 
 ifeq ($(MIKU_MASTER),)
@@ -53,5 +58,6 @@ PRODUCT_PRODUCT_PROPERTIES += \
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
     ro.miku.version=$(MIKU_ROM_VERSION) \
     ro.miku.buildtype=$(TARGET_MIKU_BUILD_VARIANT) \
-    ro.miku.maintainer=$(TARGET_MIKU_MASTER)
+    ro.miku.maintainer=$(TARGET_MIKU_MASTER) \
+    ro.miku.rom_name=$(subst $(space),_,$(MIKU_ROM_NAME))
 

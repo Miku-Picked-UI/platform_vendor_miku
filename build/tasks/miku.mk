@@ -1,5 +1,6 @@
 #
 # Copyright (C) 2021-2023 Miku UI
+# Copyright (C) 2026 Miku-Picked UI
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,8 +55,9 @@ diva: $(INTERNAL_OTA_PACKAGE_TARGET)
 	@echo -e ${CL_CYN}"\033[36m       .l0k,            ,k0d.             ██  ██  ██ ██ ██  ██  ██    ██     ██    ██ ██\033[0m"${CL_RST}
 	@echo -e ${CL_CYN}"\033[36m        .;,.            .,;.              ██      ██ ██ ██   ██  ██████       ██████  ██\033[0m"${CL_RST}
 	@echo -e ${CL_CYN}"\033[36m-----------------------------------------------------------------------------------------\033[0m"${CL_RST}
+	@echo -e ${CL_CYN}"\033[36m                         Miku-Picked UI  -  Miku UI + cherry-picked goodies\033[0m"${CL_RST}
 	@echo -e ${CL_CYN}"\033[36m编译完成啦~快来认领你的小Miku吧！\033[0m"${CL_RST}
-	@echo -e ${CL_CYN}"\033[36m感谢各位对Miku UI的认可~最后请让我说一声：\033[0m"${CL_RST}
+	@echo -e ${CL_CYN}"\033[36m感谢各位对Miku-Picked UI的认可~最后请让我说一声：\033[0m"${CL_RST}
 	@echo -e ${CL_CYN}"\033[5;36;30m3 9！\033[0m"${CL_RST}
 	@echo "Package Complete: $(TARGET_FILES_PACKAGE)" >&2
 	@echo "Package Sha256sum: `cat $(TARGET_FILES_PACKAGE).sha256sum | cut -d ' ' -f 1`" >&2
