@@ -84,6 +84,14 @@ endif
 
 ifneq ($(TARGET_KERNEL_CLANG_VERSION),)
     KERNEL_CLANG_VERSION := clang-$(TARGET_KERNEL_CLANG_VERSION)
+else ifneq ($(filter lineage_%,$(TARGET_PRODUCT)),)
+    # LineageOS 23.2 device trees (vendor/lineage compatibility layer) build
+    # their kernel with the platform clang, as LineageOS does
+    # (LLVM_AOSP_PREBUILTS_VERSION in vendor/lineage/build/envsetup.sh).
+    KERNEL_CLANG_VERSION := $(strip $(shell python3 build/soong/scripts/get_clang_version.py 2>/dev/null))
+    ifeq ($(KERNEL_CLANG_VERSION),)
+        KERNEL_CLANG_VERSION := clang-r547379
+    endif
 else
     # Use the default version of clang if TARGET_KERNEL_CLANG_VERSION hasn't been set by the device config
     KERNEL_CLANG_VERSION := clang-r547379
