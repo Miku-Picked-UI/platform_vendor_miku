@@ -132,12 +132,39 @@ def get_from_manifest(device_name):
     return None
 
 
+def _manifest_projects(manifest, projects, seen):
+    # Collect name -> path for a manifest file and the files it includes,
+    # applying remove-project the same way repo does.
+    manifest = os.path.normpath(manifest)
+    if manifest in seen or not os.path.exists(manifest):
+        return
+    seen.add(manifest)
+    man = load_manifest(manifest)
+    for elem in man:
+        if elem.tag == "include" and elem.get("name"):
+            _manifest_projects(os.path.join(".repo/manifests", elem.get("name")),
+                               projects, seen)
+        elif elem.tag == "remove-project":
+            name, path = elem.get("name"), elem.get("path")
+            for key in [k for k, v in projects.items()
+                        if (name and k[0] == name) or (path and v == path)]:
+                del projects[key]
+        elif elem.tag == "project" and elem.get("name"):
+            path = elem.get("path") or elem.get("name")
+            projects[(elem.get("name"), path)] = path.strip('/')
+
+
 def is_in_manifest(project_path):
-    man = load_manifest(custom_local_manifest)
-    for local_path in man.findall("project"):
-        if local_path.get("path") == project_path:
-            return True
-    return False
+    # A dependency is present if any manifest repo will sync already has a
+    # project at that path: the main manifest (with its includes) or any
+    # local manifest, e.g. the device manifests in manifesto/local_manifests.
+    projects, seen = {}, set()
+    _manifest_projects(".repo/manifest.xml", projects, seen)
+    if os.path.isdir(local_manifests):
+        for f in sorted(os.listdir(local_manifests)):
+            if f.endswith(".xml"):
+                _manifest_projects(os.path.join(local_manifests, f), projects, seen)
+    return project_path.strip('/') in projects.values()
 
 
 def add_to_manifest(repos, fallback_branch=None):
