@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2026 Miku-Picked UI
+     SPDX-License-Identifier: Apache-2.0
+     Emoji style "openmoji": loaded by SystemFonts when persist.sys.ax_emoji_style=openmoji.
+-->
+<fonts-modification version="1">
+    <family customizationType="new-locale-family" operation="prepend" lang="und-Zsye">
+        <font weight="400" style="normal">OpenMojiPicked.ttf</font>
+    </family>
+</fonts-modification>

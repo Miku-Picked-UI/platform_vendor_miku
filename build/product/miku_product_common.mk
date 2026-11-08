@@ -70,6 +70,9 @@ endif
 PRODUCT_PACKAGES += \
     UdfpsIcons
 
+# Selectable emoji styles
+$(call inherit-product, vendor/miku/emoji/emoji.mk)
+
 # AxionFx audio effects (AxionOS), with Clarity and Dynamic System
 -include packages/apps/AxionFx/config.mk
 
