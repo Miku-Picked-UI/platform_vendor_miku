@@ -66,6 +66,9 @@ PRODUCT_PACKAGES += \
     AudioFX
 endif
 
+# AxionFx audio effects (AxionOS), with Clarity and Dynamic System
+-include packages/apps/AxionFx/config.mk
+
 # Dynamic island: OneUisland (settings app; the island runs in SystemUI).
 # Source: vendor/miku/oneuisland/src, synced from csabaikende-ctrl/OneUisland.
 PRODUCT_PACKAGES += \
