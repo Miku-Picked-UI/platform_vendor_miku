@@ -1,0 +1,11 @@
+// Fingerprint icons for under-display sensors, from Evolution X vendor_extras
+// (themes/udfps/UdfpsIcons, https://github.com/Evolution-X/vendor_extras/tree/bka).
+// Read by SystemUI UdfpsIconDrawable and MikuSettings PickedUdfpsIcons.
+
+android_app {
+    name: "UdfpsIcons",
+    platform_apis: true,
+    resource_dirs: ["res"],
+    certificate: "platform",
+    system_ext_specific: true,
+}

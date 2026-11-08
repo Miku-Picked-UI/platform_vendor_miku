@@ -66,6 +66,10 @@ PRODUCT_PACKAGES += \
     AudioFX
 endif
 
+# Fingerprint icons for under-display sensors (Evolution X), see vendor/miku/udfps_icons
+PRODUCT_PACKAGES += \
+    UdfpsIcons
+
 # AxionFx audio effects (AxionOS), with Clarity and Dynamic System
 -include packages/apps/AxionFx/config.mk
 
