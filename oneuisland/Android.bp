@@ -41,6 +41,9 @@ android_app {
     // Keep R.java with the final resource IDs of this APK: SystemUI's copy
     // of the island code loads these resources from this package.
     use_resource_processor: false,
+    // Non-final IDs (same values): SystemUI's R8 resource shrinking rejects
+    // final R fields that are not its own.
+    aaptflags: ["--non-final-ids"],
     optimize: {
         enabled: false,
     },
