@@ -66,6 +66,11 @@ PRODUCT_PACKAGES += \
     AudioFX
 endif
 
+# Dynamic island: OneUisland (settings app; the island runs in SystemUI).
+# Source: vendor/miku/oneuisland/src, synced from csabaikende-ctrl/OneUisland.
+PRODUCT_PACKAGES += \
+    OneUisland
+
 # Bootanimation
 PRODUCT_PACKAGES += \
     bootanimation.zip \

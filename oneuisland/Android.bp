@@ -1,0 +1,54 @@
+//
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// OneUisland dynamic island for Miku-Picked UI.
+//
+// The OneUisland source is NOT part of this repository: the manifest syncs
+// https://github.com/csabaikende-ctrl/OneUisland (branch release-1.5.0) into
+// src/ (vendor/miku/oneuisland/src). OneUisland is an LSPosed module; here it
+// is built without Xposed:
+//
+//  - OneUisland: the module app itself (settings screen, settings provider,
+//    test notification and the drawables the island loads at runtime).
+//  - OneUisland-island: the same sources as a library, statically linked into
+//    SystemUI, where com.android.systemui.picked.oneuisland.OneUislandHost
+//    drives the island natively instead of through Xposed hooks.
+//
+// The Xposed API stubs from src/stubs are compile-time only, as in the
+// module's own Gradle build.
+
+java_library {
+    name: "OneUisland-xposed-stubs",
+    srcs: ["src/stubs/src/main/java/**/*.java"],
+    sdk_version: "current",
+    installable: false,
+}
+
+android_app {
+    name: "OneUisland",
+    srcs: ["src/app/src/main/java/**/*.java"],
+    resource_dirs: ["src/app/src/main/res"],
+    // The module's manifest relies on Gradle's namespace for its package.
+    manifest: "AndroidManifest.xml",
+    libs: ["OneUisland-xposed-stubs"],
+    platform_apis: true,
+    certificate: "platform",
+    system_ext_specific: true,
+    // Keep R.java with the final resource IDs of this APK: SystemUI's copy
+    // of the island code loads these resources from this package.
+    use_resource_processor: false,
+    optimize: {
+        enabled: false,
+    },
+}
+
+java_library {
+    name: "OneUisland-island",
+    srcs: [
+        "src/app/src/main/java/**/*.java",
+        ":OneUisland{.aapt.srcjar}",
+    ],
+    libs: ["OneUisland-xposed-stubs"],
+    installable: false,
+}
