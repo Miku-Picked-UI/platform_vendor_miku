@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 Miku-Picked UI
+# SPDX-License-Identifier: Apache-2.0
+
+# Custom emoji font picked in Settings > Miku-Picked > Emoji style. system_server copies it
+# here at boot (FontManagerService); the directory is labeled font_data_file so every app can
+# read the font, like updatable system fonts.
+on post-fs-data
+    mkdir /data/fonts/picked 0771 system system
