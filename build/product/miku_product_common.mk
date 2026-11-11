@@ -105,6 +105,12 @@ PRODUCT_PRODUCT_PROPERTIES += \
 PRODUCT_COPY_FILES += \
     vendor/miku/prebuilt/common/etc/init/init.miku.performance_mode.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/init.miku.performance_mode.rc
 
+# Miku-Picked UI: system-wide Liquid Glass (renderengine, from PenguinOS) on by default;
+# Settings > Picked features turns it off or changes the refraction.
+PRODUCT_PRODUCT_PROPERTIES += \
+    persist.sys.penguin.liquid_glass=1 \
+    persist.sys.penguin.liquid_glass_refraction=60
+
 # Miku-Picked UI: custom emoji font directory
 PRODUCT_COPY_FILES += \
     vendor/miku/prebuilt/common/etc/init/init.picked.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/init.picked.rc
