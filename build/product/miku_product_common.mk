@@ -109,7 +109,12 @@ PRODUCT_COPY_FILES += \
 # Settings > Picked features turns it off or changes the refraction.
 PRODUCT_PRODUCT_PROPERTIES += \
     persist.sys.penguin.liquid_glass=1 \
-    persist.sys.penguin.liquid_glass_refraction=60
+    persist.sys.penguin.liquid_glass_refraction=60 \
+    persist.sys.penguin.liquid_glass_style=ios
+
+# Optional private assets (ColorOS animations, Liquid Glass glyphs), only when
+# vendor/penguin-assets-extra is synced (manifesto/local_manifests/penguin-assets-extra.xml).
+-include vendor/penguin-assets-extra/product.mk
 
 # Miku-Picked UI: custom emoji font directory
 PRODUCT_COPY_FILES += \
