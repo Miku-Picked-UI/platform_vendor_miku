@@ -1,0 +1,12 @@
+//
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+
+aconfig_values {
+    name: "aconfig-values-miku-bp4a-com.android.systemui-all",
+    package: "com.android.systemui",
+    srcs: [
+        "*_flag_values.textproto",
+    ],
+}

@@ -1,0 +1,8 @@
+# Miku-Picked UI: run the media controls on Android 16's Compose media stack
+# (MediaCarouselInteractor / remedia). The Quick Settings Control Centre's media card reads it.
+flag_value {
+  package: "com.android.systemui"
+  name: "media_controls_in_compose"
+  state: ENABLED
+  permission: READ_ONLY
+}

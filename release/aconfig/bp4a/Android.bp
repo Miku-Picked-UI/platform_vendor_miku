@@ -16,5 +16,6 @@
 aconfig_value_set {
     name: "aconfig_value_set-miku-bp4a",
     values: [
+        "aconfig-values-miku-bp4a-com.android.systemui-all",
     ],
 }
