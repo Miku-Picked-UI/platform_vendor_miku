@@ -116,6 +116,11 @@ PRODUCT_PRODUCT_PROPERTIES += \
 # vendor/penguin-assets-extra is synced (manifesto/local_manifests/penguin-assets-extra.xml).
 -include vendor/penguin-assets-extra/product.mk
 
+# Miku-Picked UI: GPU driver switch helper (Picked features), for kernels with
+# FlopKernel's Mali KMD selector
+PRODUCT_PACKAGES += \
+    picked_mali_switch
+
 # Miku-Picked UI: custom emoji font directory
 PRODUCT_COPY_FILES += \
     vendor/miku/prebuilt/common/etc/init/init.picked.rc:$(TARGET_COPY_OUT_SYSTEM)/etc/init/init.picked.rc

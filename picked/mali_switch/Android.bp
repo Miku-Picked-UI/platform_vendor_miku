@@ -1,0 +1,20 @@
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// Root helper behind Settings' GPU driver switch (Picked features): patches
+// the kernel image's mali.version token in the boot partition.
+
+cc_binary {
+    name: "picked_mali_switch",
+    srcs: ["picked_mali_switch.cpp"],
+    shared_libs: [
+        "libbase",
+        "liblog",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+    ],
+    init_rc: ["picked_mali_switch.rc"],
+    system_ext_specific: true,
+}

@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 Miku-Picked UI
+# SPDX-License-Identifier: Apache-2.0
+
+# Settings' GPU driver switch: Settings sets sys.picked.mali.request to
+# <version>:<nonce>; the helper patches the boot image's mali.version token and
+# reports in sys.picked.mali.status.
+service picked_mali_switch /system_ext/bin/picked_mali_switch
+    user root
+    group root
+    disabled
+    oneshot
+
+on property:sys.picked.mali.request=*
+    setprop sys.picked.mali.status pending
+    start picked_mali_switch
