@@ -11,3 +11,15 @@ on post-fs-data
 # (system uid) writes bootanimation.zip here; bootanimation (graphics uid) only reads it.
 on post-fs-data
     mkdir /data/misc/picked_bootanim 0755 system system
+
+# Ad blocker (Settings > Picked features > Ad blocker): Settings writes the merged hosts file
+# here, in place, and init lays it over /system/etc/hosts, which the DNS resolver reads before
+# asking any DNS server (also with Private DNS on). Switching it off unmounts it again.
+on post-fs-data
+    mkdir /data/misc/picked_adblock 0755 system system
+
+on property:persist.sys.picked.adblock=1
+    mount none /data/misc/picked_adblock/hosts /system/etc/hosts bind
+
+on property:persist.sys.picked.adblock=0
+    umount /system/etc/hosts
