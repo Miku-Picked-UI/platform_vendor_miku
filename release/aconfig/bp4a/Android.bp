@@ -18,5 +18,6 @@ aconfig_value_set {
     values: [
         "aconfig-values-miku-bp4a-com.android.systemui-all",
         "aconfig-values-miku-bp4a-com.android.wm.shell-all",
+        "aconfig-values-miku-bp4a-com.android.window.flags-all",
     ],
 }

@@ -97,4 +97,11 @@
     <!-- Name of the font family to use in the default lockscreen clock -->
     <string name="config_clockFontFamily" translatable="false">google-sans-clock</string>
 
+    <!-- Miku-Picked UI: desktop mode on external displays (Picked features > Connected devices >
+         Desktop mode on a monitor). The device is eligible, but the phone's own screen never hosts
+         desktops; the desktop experience flags only turn on with
+         persist.wm.debug.desktop_experience_devopts, which the Settings switch sets. -->
+    <bool name="config_isDesktopModeSupported">true</bool>
+    <bool name="config_canInternalDisplayHostDesktops">false</bool>
+
 </resources>

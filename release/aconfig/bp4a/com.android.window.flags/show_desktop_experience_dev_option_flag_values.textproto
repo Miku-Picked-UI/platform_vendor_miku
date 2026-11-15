@@ -1,0 +1,9 @@
+# Miku-Picked UI: lets persist.wm.debug.desktop_experience_devopts (Developer options > Enable
+# desktop experience features, and Picked features > Desktop mode on a monitor) turn on the
+# connected-display desktop flags at boot. Off unless the user enables it.
+flag_value {
+  package: "com.android.window.flags"
+  name: "show_desktop_experience_dev_option"
+  state: ENABLED
+  permission: READ_ONLY
+}
