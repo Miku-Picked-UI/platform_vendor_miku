@@ -1,0 +1,7 @@
+# Miku-Picked UI: move an app bubble back to full screen (with enable_create_any_bubble).
+flag_value {
+  package: "com.android.wm.shell"
+  name: "enable_bubble_to_fullscreen"
+  state: ENABLED
+  permission: READ_ONLY
+}

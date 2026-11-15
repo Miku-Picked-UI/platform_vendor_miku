@@ -1,0 +1,8 @@
+# Miku-Picked UI: open any app as a floating bubble (launcher long-press > Bubble, and dragging
+# a taskbar icon to the bubble area). The code ships in Android 16 behind this flag.
+flag_value {
+  package: "com.android.wm.shell"
+  name: "enable_create_any_bubble"
+  state: ENABLED
+  permission: READ_ONLY
+}
