@@ -97,6 +97,10 @@ PRODUCT_PACKAGES += \
     picked_bootanim_orbit \
     picked_bootanim_glitch
 
+# [Miku-Picked UI] Reactive live wallpaper
+PRODUCT_PACKAGES += \
+    PickedReactiveWallpaper
+
 # Charger mode images
 PRODUCT_PACKAGES += \
     charger_res_images \

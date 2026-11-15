@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 Miku-Picked UI ; SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="app_name">Reactive wallpaper</string>
+    <string name="author">Miku-Picked UI</string>
+    <string name="description">Moves as you tilt the phone, follows the time of day and reacts to your battery. Use your own photo or the dynamic sky.</string>
+    <string name="settings_title">Reactive wallpaper</string>
+    <string name="pick_photo">Choose photo</string>
+    <string name="use_sky">Use dynamic sky</string>
+    <string name="parallax">Tilt parallax</string>
+    <string name="parallax_summary">The wallpaper shifts slightly as you tilt the phone</string>
+    <string name="daylight">Time of day</string>
+    <string name="daylight_summary">Warmer at sunrise and sunset, dimmer and bluer at night</string>
+    <string name="battery">Battery effects</string>
+    <string name="battery_summary">A soft glow while charging, colours fade when the battery is low</string>
+    <string name="photo_failed">That photo could not be used</string>
+</resources>

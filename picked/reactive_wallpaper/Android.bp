@@ -1,0 +1,13 @@
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// Reactive live wallpaper: tilt parallax, time-of-day light and battery effects over the
+// user's photo or a dynamic sky.
+
+android_app {
+    name: "PickedReactiveWallpaper",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    sdk_version: "current",
+    product_specific: true,
+}

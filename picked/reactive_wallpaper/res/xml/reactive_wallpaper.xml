@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 Miku-Picked UI ; SPDX-License-Identifier: Apache-2.0 -->
+<wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/description"
+    android:author="@string/author"
+    android:settingsActivity="com.mikupicked.reactivewallpaper.SettingsActivity" />
