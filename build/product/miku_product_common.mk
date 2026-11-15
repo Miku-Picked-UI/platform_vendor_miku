@@ -81,6 +81,11 @@ $(call inherit-product, vendor/miku/emoji/emoji.mk)
 PRODUCT_PACKAGES += \
     OneUisland
 
+# Game Space (Evolution X / chaldeaprjkt): in-game overlay bar, driven by
+# GameManagerService's GAME_START/GAME_STOP broadcasts. See packages/apps/GameSpace.
+PRODUCT_PACKAGES += \
+    GameSpace
+
 # Bootanimation
 PRODUCT_PACKAGES += \
     bootanimation.zip \
