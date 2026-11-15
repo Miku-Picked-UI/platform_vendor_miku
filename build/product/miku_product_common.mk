@@ -91,6 +91,12 @@ PRODUCT_PACKAGES += \
     bootanimation.zip \
     bootanimation-dark.zip
 
+# [Miku-Picked UI] Boot animation picker: bundled styles
+PRODUCT_PACKAGES += \
+    picked_bootanim_pulse \
+    picked_bootanim_orbit \
+    picked_bootanim_glitch
+
 # Charger mode images
 PRODUCT_PACKAGES += \
     charger_res_images \

@@ -6,3 +6,8 @@
 # read the font, like updatable system fonts.
 on post-fs-data
     mkdir /data/fonts/picked 0771 system system
+
+# Boot animation imported in Settings > Picked features > Style > Boot animation. Settings
+# (system uid) writes bootanimation.zip here; bootanimation (graphics uid) only reads it.
+on post-fs-data
+    mkdir /data/misc/picked_bootanim 0755 system system

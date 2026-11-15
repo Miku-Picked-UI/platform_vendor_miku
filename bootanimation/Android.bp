@@ -26,3 +26,29 @@ install_symlink {
     installed_location: "media/bootanimation-dark.zip",
     symlink_target: "bootanimation.zip",
 }
+
+// [Miku-Picked UI] Bundled boot animations for the Settings picker (persist.sys.picked.bootanim),
+// rendered by .picked-tools/gen_bootanims.py. Installed to /product/media/picked_bootanim/.
+prebuilt_media {
+    name: "picked_bootanim_pulse",
+    src: "picked/pulse.zip",
+    filename: "pulse.zip",
+    relative_install_path: "picked_bootanim",
+    product_specific: true,
+}
+
+prebuilt_media {
+    name: "picked_bootanim_orbit",
+    src: "picked/orbit.zip",
+    filename: "orbit.zip",
+    relative_install_path: "picked_bootanim",
+    product_specific: true,
+}
+
+prebuilt_media {
+    name: "picked_bootanim_glitch",
+    src: "picked/glitch.zip",
+    filename: "glitch.zip",
+    relative_install_path: "picked_bootanim",
+    product_specific: true,
+}
