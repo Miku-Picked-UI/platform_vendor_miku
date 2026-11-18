@@ -1658,7 +1658,7 @@ final class Panel extends FrameLayout {
             public void onCapabilitiesChanged(Network network, final NetworkCapabilities networkCapabilities) {
                 Panel.this.vpnNetworks.put(network, (String) Panel.guarded(new Callable() { // from class: dev.colorcc.Panel.7.0
                     @Override // java.util.concurrent.Callable
-                    public final Object call() {
+                    public final Object call() throws Exception {
                         return m88lambda$onCapabilitiesChanged$0$devcolorccPanel$7(networkCapabilities);
                     }
                 }));
@@ -6042,7 +6042,7 @@ final class Panel extends FrameLayout {
             ClassLoader classLoader = obj.getClass().getClassLoader();
             Object objNewProxyInstance = Proxy.newProxyInstance(classLoader, new Class[]{Class.forName("com.android.systemui.plugins.qs.QSTile$Callback", false, classLoader)}, new InvocationHandler() { // from class: dev.colorcc.Panel.Bound.0
                 @Override // java.lang.reflect.InvocationHandler
-                public final Object invoke(Object obj2, Method method, Object[] objArr) {
+                public final Object invoke(Object obj2, Method method, Object[] objArr) throws Throwable {
                     return Bound.this.m94lambda$new$2$devcolorccPanel$Bound(consumer, obj2, method, objArr);
                 }
             });
@@ -6319,7 +6319,11 @@ final class Panel extends FrameLayout {
             }
         }
         Field fieldFindFieldIfExists2 = XposedHelpers.findFieldIfExists(obj.getClass(), "mDrawable");
-        return (fieldFindFieldIfExists2 == null || (obj2 = fieldFindFieldIfExists2.get(obj)) == null) ? obj : obj2;
+        try {
+            return (fieldFindFieldIfExists2 == null || (obj2 = fieldFindFieldIfExists2.get(obj)) == null) ? obj : obj2;
+        } catch (IllegalAccessException e) {
+            return obj;
+        }
     }
 
     /* JADX INFO: Access modifiers changed from: private */
@@ -6844,7 +6848,11 @@ final class Panel extends FrameLayout {
     }
 
     private boolean flowTrue(Object obj, String str) {
-        return Boolean.TRUE.equals(flowValue(obj, str));
+        try {
+            return Boolean.TRUE.equals(flowValue(obj, str));
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /* JADX INFO: Access modifiers changed from: private */
@@ -8754,7 +8762,7 @@ final class Panel extends FrameLayout {
 
         private void showActions() {
             Context contextCreatePackageContext;
-            Drawable drawable;
+            Drawable drawable = null;
             PlaybackState playbackState = Panel.this.controller == null ? null : Panel.this.controller.getPlaybackState();
             List<PlaybackState.CustomAction> customActions = playbackState == null ? Collections.EMPTY_LIST : playbackState.getCustomActions();
             try {
@@ -10102,7 +10110,7 @@ final class Panel extends FrameLayout {
         private String samsungSpec(final String str) {
             Object objQuiet = quiet(new Callable() { // from class: dev.colorcc.Panel.Editor.8
                 @Override // java.util.concurrent.Callable
-                public final Object call() {
+                public final Object call() throws Exception {
                     return Editor.this.m138lambda$samsungSpec$25$devcolorccPanel$Editor(str);
                 }
             });
@@ -10151,13 +10159,17 @@ final class Panel extends FrameLayout {
         }
 
         /* [Miku-Picked UI] Rebuilt from the bytecode (jadx could not decompile it). */
-        private boolean shows(final String str) throws PackageManager.NameNotFoundException {
+        private boolean shows(final String str) {
             if (str.startsWith("custom(") && str.endsWith(")")) {
                 ComponentName componentNameUnflattenFromString = ComponentName.unflattenFromString(str.substring(7, str.length() - 1));
                 if (componentNameUnflattenFromString == null) {
                     return false;
                 }
-                getContext().getPackageManager().getServiceInfo(componentNameUnflattenFromString, 0);
+                try {
+                    getContext().getPackageManager().getServiceInfo(componentNameUnflattenFromString, 0);
+                } catch (PackageManager.NameNotFoundException e) {
+                    return false;
+                }
                 if (Boolean.FALSE.equals(quiet(new Callable() {
                     @Override
                     public final Object call() throws Exception {
@@ -10187,12 +10199,12 @@ final class Panel extends FrameLayout {
         private boolean usable(final Object obj, final String str) {
             return (str.isEmpty() || Logic.kind(str) != 0 || Boolean.TRUE.equals(quiet(new Callable() { // from class: dev.colorcc.Panel.Editor.6
                 @Override // java.util.concurrent.Callable
-                public final Object call() {
+                public final Object call() throws Exception {
                     return Editor.lambda$usable$29(obj, str);
                 }
             })) || Boolean.TRUE.equals(quiet(new Callable() { // from class: dev.colorcc.Panel.Editor.7
                 @Override // java.util.concurrent.Callable
-                public final Object call() {
+                public final Object call() throws Exception {
                     return Editor.lambda$usable$30(obj, str);
                 }
             }))) ? false : true;
@@ -10264,7 +10276,7 @@ final class Panel extends FrameLayout {
             }
             final Object objQuiet = quiet(new Callable() { // from class: dev.colorcc.Panel.Editor.41
                 @Override // java.util.concurrent.Callable
-                public final Object call() {
+                public final Object call() throws Exception {
                     return Editor.lambda$tileFor$31(str);
                 }
             });
@@ -10416,6 +10428,7 @@ final class Panel extends FrameLayout {
             } else if (tileGrid == this.blockGrid && isPin(view)) {
                 if (overBlocks(f2)) {
                     editor = this;
+                    runnable = null;
                 } else {
                     editor = this;
                     runnable = new Runnable() { // from class: dev.colorcc.Panel.Editor.54
