@@ -131,6 +131,10 @@ PRODUCT_PRODUCT_PROPERTIES += \
 # vendor/penguin-assets-extra is synced (manifesto/local_manifests/penguin-assets-extra.xml).
 -include vendor/penguin-assets-extra/product.mk
 
+# ColorCC panel style (by Guest), part of vendor/miku. SystemUI's qs-control-centre
+# branch links its panel; this adds the ColorCC strings app (package dev.colorcc).
+include vendor/miku/colorcc/product.mk
+
 # Miku-Picked UI: GPU driver switch helper (Picked features), for kernels with
 # FlopKernel's Mali KMD selector
 PRODUCT_PACKAGES += \

@@ -1,0 +1,32 @@
+//
+// ColorCC panel style for Miku-Picked UI.
+//
+// ColorCC is a ColorOS-style control centre by Guest (github.com/addictedcaf/ColorCC),
+// originally an LSPosed module for One UI 9 / 8.5. The author lost the sources and agreed to
+// this port: the code was recovered from the 0.99.68 release APK and ported to AOSP SystemUI.
+// Part of vendor/miku; the panel is linked into SystemUI by module name (ColorCC-panel).
+//
+//  - ColorCC-panel: the panel, statically linked into SystemUI (frameworks/base branch
+//    qs-control-centre), where com.android.systemui.picked.colorcc.ColorCcHost places it
+//    (Settings.Secure qs_panel_style = 7).
+//  - ColorCC: package dev.colorcc, only the panel's strings and their translations, which the
+//    panel loads from that package at runtime as the module did.
+
+java_library {
+    name: "ColorCC-panel",
+    srcs: ["java/**/*.java"],
+    installable: false,
+}
+
+android_app {
+    name: "ColorCC",
+    resource_dirs: ["res"],
+    manifest: "AndroidManifest.xml",
+    platform_apis: true,
+    certificate: "platform",
+    system_ext_specific: true,
+    use_generic_config: true,
+    optimize: {
+        enabled: false,
+    },
+}
