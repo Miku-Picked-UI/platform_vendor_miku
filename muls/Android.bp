@@ -16,4 +16,9 @@ android_app_import {
     certificate: "platform",
     product_specific: true,
     overrides: ["MULS_Dummy"],
+    // Declared in the APK's manifest as <uses-library android:required="false">.
+    optional_uses_libs: [
+        "androidx.window.extensions",
+        "androidx.window.sidecar",
+    ],
 }
