@@ -5637,7 +5637,9 @@ final class Panel extends FrameLayout {
                         int iIntValue = (num2 == null || num2.intValue() < 2) ? 1 : num2.intValue();
                         this.torchMax = iIntValue;
                         this.torchLevel = -1;
-                        this.torchStrength = iIntValue < 2 ? 1.0f : cameraManager.getTorchStrengthLevel(str) / this.torchMax;
+                        // [Miku-Picked UI] Float division: as ints every level below the maximum came out 0, so a
+                        // dimmed torch looked off and the first tap "turned it on" instead of off.
+                        this.torchStrength = iIntValue < 2 ? 1.0f : cameraManager.getTorchStrengthLevel(str) / (float) this.torchMax;
                         return true;
                     }
                 }
@@ -5655,7 +5657,7 @@ final class Panel extends FrameLayout {
             }
             this.torchLevel = iMax;
             if (iMax > 0) {
-                this.torchStrength = iMax / this.torchMax;
+                this.torchStrength = iMax / (float) this.torchMax;
             }
             try {
                 CameraManager cameraManager = (CameraManager) getContext().getSystemService(CameraManager.class);
@@ -9634,10 +9636,8 @@ final class Panel extends FrameLayout {
                         break;
                     }
                     View next = it.next();
-                    if (!z2) {
-                        i = 0;
-                    }
-                    next.setLayerType(i, null);
+                    // [Miku-Picked UI] jadx reused i (the part count) here; it is the layer type.
+                    next.setLayerType(z2 ? View.LAYER_TYPE_HARDWARE : View.LAYER_TYPE_NONE, null);
                 }
                 Panel.this.content.setLayerType(z2 ? 2 : 0, null);
             }
