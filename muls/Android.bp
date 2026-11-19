@@ -1,0 +1,19 @@
+//
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// Miku UI Lyrics Stub (com.miku.lyricsstub) by the Miku UI team, v1.6.1 "unofficial" build from
+// https://sourceforge.net/projects/divarelease/files/Miku%20UI%20Lyrics%20Stub/For%20Unofficial/
+//
+// The stub runs as android.uid.system, so it only installs when signed with the device's platform
+// key. The published APK is signed with the public AOSP test key, so a build with its own keys
+// could never install it over MULS_Dummy (the download prompt). It is re-signed here with this
+// build's platform key and shipped in its place.
+
+android_app_import {
+    name: "MikuLyricsStub",
+    apk: "MikuLyricsStub.apk",
+    certificate: "platform",
+    product_specific: true,
+    overrides: ["MULS_Dummy"],
+}

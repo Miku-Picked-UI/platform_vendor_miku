@@ -55,7 +55,7 @@ PRODUCT_PACKAGES += \
     Gboard \
     LiveWallpapersPicker \
     MUBB \
-    MULS_Dummy \
+    MikuLyricsStub \
     PartnerBookmarksProvider \
     ThemePicker \
     ThemesStub
