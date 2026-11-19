@@ -394,6 +394,14 @@ final class Panel extends FrameLayout {
     private final List<Body> staticBodies;
     private View statusCarrier;
     private View statusRow;
+    /*
+     * [Miku-Picked UI] On One UI the stock status row was a slim line the panel slid its buttons
+     * next to and forced visible. AOSP's shade header is the big clock, date and carriers, which
+     * drew over the panel; SystemUI now fades it out while ColorCC is open
+     * (picked/colorcc/ColorCcHeaderCover), so leave it alone.
+     */
+    private static final boolean SWAP_STOCK_STATUS_ROW = false;
+    private static final float BLUR_STEPS = 4.0f;
     private boolean statusRowLogged;
     private boolean statusSearched;
     private final List<View> stock;
@@ -1546,7 +1554,10 @@ final class Panel extends FrameLayout {
         RenderEffect renderEffectCreateBlurEffect;
         float fClamp = Logic.clamp(Math.max(this.sheetBack, this.playerBack));
         this.content.setAlpha(1.0f - Math.max(Logic.clamp(this.sheetBack) * 0.9f, Logic.clamp(this.playerBack) * 0.3f));
-        int iRound = Math.round(dp(24.0f) * fClamp);
+        // [Miku-Picked UI] A new radius re-renders and re-blurs the whole panel, and the player
+        // and menus changed it on every frame of their grow, so each of those frames missed its
+        // deadline. Four steps keep the blur deepening with the motion at a fraction of the cost.
+        int iRound = Math.round(dp(24.0f) * (((float) Math.ceil(fClamp * BLUR_STEPS)) / BLUR_STEPS));
         if (iRound == this.shownBlur) {
             return;
         }
@@ -2511,7 +2522,7 @@ final class Panel extends FrameLayout {
             }
         }
         swapStatusRow();
-        if (this.interactive && this.page && !this.stockNeeded && !locked()) {
+        if (this.statusRow != null && this.interactive && this.page && !this.stockNeeded && !locked()) {
             showStatusRow();
         }
     }
@@ -2685,7 +2696,7 @@ final class Panel extends FrameLayout {
     private float statusShift() {
         float f = 0.0f;
         if (!this.twoPane && !landscape()) {
-            if (!this.statusSearched) {
+            if (!this.statusSearched && SWAP_STOCK_STATUS_ROW) {
                 this.statusSearched = true;
                 int identifier = getResources().getIdentifier("split_shade_status_bar", "id", "com.android.systemui");
                 int identifier2 = getResources().getIdentifier("carrier_group", "id", "com.android.systemui");
@@ -8689,6 +8700,13 @@ final class Panel extends FrameLayout {
         /* renamed from: applyShow, reason: merged with bridge method [inline-methods] and merged with bridge method [inline-methods] */
         public void m165lambda$new$19$devcolorccPanel$Player(float f, float f2) {
             this.grown = Logic.clamp(f);
+            // [Miku-Picked UI] While the card grows or shrinks only its scale, position, outline
+            // and alpha change: draw it from a cached GPU layer instead of redrawing the art,
+            // texts and buttons (and an offscreen pass for the alpha) every frame.
+            int layer = (f2 != 0.0f || (f > 0.0f && f < 1.0f)) ? View.LAYER_TYPE_HARDWARE : View.LAYER_TYPE_NONE;
+            if (this.card.getLayerType() != layer) {
+                this.card.setLayerType(layer, null);
+            }
             float f3 = this.fromScale;
             float f4 = f3 + ((1.0f - f3) * f);
             this.card.setScaleX(f4);
@@ -8871,7 +8889,8 @@ final class Panel extends FrameLayout {
             long jMin = jDuration > 0 ? Math.min(position, jDuration) : Math.max(0L, position);
             this.seek.setEnabled(jDuration > 0);
             if (!this.seek.dragging) {
-                this.seek.set(jDuration > 0 ? jMin / jDuration : 0.0f);
+                // [Miku-Picked UI] jadx dropped the float cast: long / long is 0 until the end.
+                this.seek.set(jDuration > 0 ? jMin / (float) jDuration : 0.0f);
                 this.elapsed.setText(Logic.clock(jMin));
             }
             this.total.setText(jDuration > 0 ? Logic.clock(jDuration) : "");
