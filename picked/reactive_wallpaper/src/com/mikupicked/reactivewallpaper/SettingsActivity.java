@@ -13,8 +13,10 @@ import android.graphics.ImageDecoder;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,7 +63,17 @@ public class SettingsActivity extends Activity {
                 ReactiveWallpaperService.KEY_DAYLIGHT);
         addSwitch(root, R.string.battery, R.string.battery_summary,
                 ReactiveWallpaperService.KEY_BATTERY);
-        setContentView(root);
+        // Edge-to-edge is enforced at target SDK 36: keep the content clear of the action bar,
+        // status bar and navigation bar, and let it scroll on small screens.
+        final ScrollView scroll = new ScrollView(this);
+        scroll.addView(root);
+        scroll.setOnApplyWindowInsetsListener((v, insets) -> {
+            final android.graphics.Insets bars = insets.getInsets(
+                    WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            return WindowInsets.CONSUMED;
+        });
+        setContentView(scroll);
     }
 
     private int dp(int v) {

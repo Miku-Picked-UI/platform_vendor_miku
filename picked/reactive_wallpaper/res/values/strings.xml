@@ -14,4 +14,5 @@
     <string name="battery">Battery effects</string>
     <string name="battery_summary">A soft glow while charging, colours fade when the battery is low</string>
     <string name="photo_failed">That photo could not be used</string>
+    <string name="no_picker">No live wallpaper picker is installed</string>
 </resources>

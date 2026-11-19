@@ -30,5 +30,13 @@
             android:label="@string/settings_title"
             android:theme="@android:style/Theme.DeviceDefault.Settings"
             android:exported="true" />
+
+        <!-- Settings > Picked features opens this: it hands the live-wallpaper preview a real
+             ComponentName extra, which a preference XML intent cannot. -->
+        <activity
+            android:name=".SetWallpaperActivity"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:exported="true" />
     </application>
 </manifest>
