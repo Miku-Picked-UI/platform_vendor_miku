@@ -6266,7 +6266,19 @@ final class Panel extends FrameLayout {
     }
 
     /* renamed from: lambda$wireTile$74$dev-colorcc-Panel, reason: not valid java name */
-    /* synthetic */ void m82lambda$wireTile$74$devcolorccPanel(final Object obj, View view) {
+    /* synthetic */ void m82lambda$wireTile$74$devcolorccPanel(final Object obj, final View view) {
+        // [Miku-Picked UI] A tap on Internet/Wi-Fi or Bluetooth opens ColorCC's own menu (as a
+        // long press does) instead of the stock tile click, which went to the stock settings.
+        int kind = Logic.kind(String.valueOf(XposedHelpers.callMethod(obj, "getTileSpec", new Object[0])));
+        if (kind == 1 || kind == 2) {
+            guard(new Runnable() {
+                @Override // java.lang.Runnable
+                public final void run() {
+                    Panel.this.m84lambda$wireTile$76$devcolorccPanel(obj, view);
+                }
+            });
+            return;
+        }
         guard(new Runnable() { // from class: dev.colorcc.Panel.64
             @Override // java.lang.Runnable
             public final void run() {
