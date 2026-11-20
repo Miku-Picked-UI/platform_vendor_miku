@@ -6712,9 +6712,9 @@ final class Panel extends FrameLayout {
     }
 
     private void showRing(int i, int i2, int i3, boolean z) {
-        this.volume.setValue(i3 == 0 ? 0.0f : i2 / i3);
+        this.volume.setValue(i3 == 0 ? 0.0f : i2 / (float) i3);
         showSlot(Logic.thumb(i), z);
-        this.sheet.showRing(i3 != 0 ? i2 / i3 : 0.0f, i == 0, z);
+        this.sheet.showRing(i3 != 0 ? i2 / (float) i3 : 0.0f, i == 0, z);
     }
 
     private void showSlot(int i, boolean z) {
@@ -8848,7 +8848,7 @@ final class Panel extends FrameLayout {
             this.volumeSteps = playbackInfo.getMaxVolume();
             int currentVolume = playbackInfo.getCurrentVolume();
             this.sentVolume = currentVolume;
-            this.loudness.set(currentVolume / this.volumeSteps);
+            this.loudness.set(currentVolume / (float) this.volumeSteps);
         }
 
         /* JADX INFO: Access modifiers changed from: private */
