@@ -1,0 +1,31 @@
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// Depth wallpaper cut-out: finds the subject of a photo on device (U²-Net, run by ONNX
+// Runtime) for Settings > Picked features > Style > Depth wallpaper. See NOTICE.
+
+// ONNX Runtime 1.22.0 (MIT) from Maven Central, com.microsoft.onnxruntime:onnxruntime-android,
+// trimmed to arm64-v8a (headers and the other ABIs removed, nothing else changed).
+android_library_import {
+    name: "picked-onnxruntime-android",
+    aars: ["libs/onnxruntime-android-1.22.0-arm64.aar"],
+    sdk_version: "current",
+    min_sdk_version: "24",
+    extract_jni: true,
+}
+
+android_app {
+    name: "PickedDepthCutout",
+    srcs: ["src/**/*.java"],
+    asset_dirs: ["assets"],
+    static_libs: ["picked-onnxruntime-android"],
+    sdk_version: "current",
+    certificate: "platform",
+    system_ext_specific: true,
+    // A system app can only load native libraries stored uncompressed in its APK.
+    use_embedded_native_libs: true,
+    // ONNX Runtime calls back into its Java classes from JNI and the AAR ships no keep rules.
+    optimize: {
+        enabled: false,
+    },
+}

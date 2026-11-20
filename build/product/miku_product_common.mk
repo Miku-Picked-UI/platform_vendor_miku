@@ -97,9 +97,10 @@ PRODUCT_PACKAGES += \
     picked_bootanim_orbit \
     picked_bootanim_glitch
 
-# [Miku-Picked UI] Reactive live wallpaper
+# [Miku-Picked UI] Reactive live wallpaper, depth wallpaper cut-out (picked/depth_cutout)
 PRODUCT_PACKAGES += \
-    PickedReactiveWallpaper
+    PickedReactiveWallpaper \
+    PickedDepthCutout
 
 # Charger mode images
 PRODUCT_PACKAGES += \

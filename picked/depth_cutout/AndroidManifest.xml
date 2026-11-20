@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 Miku-Picked UI ; SPDX-License-Identifier: Apache-2.0 -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mikupicked.depthcutout">
+
+    <application
+        android:label="Depth wallpaper cut-out"
+        android:allowBackup="false"
+        android:hasCode="true"
+        android:extractNativeLibs="false">
+
+        <!-- Bound by Settings (system uid) only; CutoutService checks the caller. -->
+        <service
+            android:name=".CutoutService"
+            android:exported="true" />
+    </application>
+</manifest>
