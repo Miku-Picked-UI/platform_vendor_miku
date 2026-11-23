@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     PickedPods - AirPods controls for Miku-Picked UI
+     Copyright (C) 2026 Miku-Picked UI
+     SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.mikupicked.airpods">
+
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Battery, device type and the device details layout as Bluetooth metadata -->
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <!-- Starting the session from the AirPods' connection broadcast -->
+    <uses-permission android:name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <application
+        android:label="@string/pods_name"
+        android:icon="@drawable/ic_pods"
+        android:allowBackup="false">
+
+        <receiver
+            android:name=".PodsReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.bluetooth.device.action.ACL_CONNECTED" />
+                <action android:name="android.bluetooth.device.action.ACL_DISCONNECTED" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".PodsService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <!-- Settings' Bluetooth device details page binds these (SettingsLib devicesettings) -->
+        <service
+            android:name=".DeviceSettingsConfigService"
+            android:exported="true"
+            android:permission="android.permission.BLUETOOTH_PRIVILEGED">
+            <intent-filter>
+                <action android:name="com.mikupicked.airpods.action.DEVICE_SETTINGS_CONFIG" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".DeviceSettingsProviderService"
+            android:exported="true"
+            android:permission="android.permission.BLUETOOTH_PRIVILEGED">
+            <intent-filter>
+                <action android:name="com.mikupicked.airpods.action.DEVICE_SETTINGS_PROVIDER" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

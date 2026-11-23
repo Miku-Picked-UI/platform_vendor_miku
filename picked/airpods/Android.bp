@@ -1,0 +1,35 @@
+//
+// PickedPods - AirPods controls for Miku-Picked UI
+// Copyright (C) 2026 Miku-Picked UI
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// AirPods listening mode, conversation awareness, ear detection, personalized volume,
+// microphone and battery in Settings' Bluetooth device details page. The AirPods protocol
+// (AACP) is from LibrePods (github.com/librepods-org/librepods, GPL-3.0), so this app is
+// GPL-3.0 too; see LICENSE. Needs the Bluetooth stack's AirPods L2CAP interop fix
+// (packages/modules/Bluetooth, from Android 17).
+
+android_app {
+    name: "PickedPods",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    static_libs: ["SettingsLibDeviceSettingsApi"],
+    sdk_version: "system_current",
+    // Platform signed: hidden BluetoothSocket constructor, Bluetooth metadata
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    required: ["privapp_permissions_com.mikupicked.airpods"],
+    optimize: {
+        // Settings binds the AIDL services by name; nothing here is big enough to shrink
+        enabled: false,
+    },
+}
+
+prebuilt_etc {
+    name: "privapp_permissions_com.mikupicked.airpods",
+    src: "privapp_permissions_com.mikupicked.airpods.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}

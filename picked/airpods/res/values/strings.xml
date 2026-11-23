@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     PickedPods - AirPods controls for Miku-Picked UI
+     Copyright (C) 2026 Miku-Picked UI
+     SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<resources>
+    <string name="pods_name">AirPods</string>
+    <string name="pods_channel">AirPods battery</string>
+    <string name="pods_left">L %1$d%%</string>
+    <string name="pods_right">R %1$d%%</string>
+    <string name="pods_case">Case %1$d%%</string>
+
+    <string name="pods_listening_mode">Listening mode</string>
+    <string name="pods_mode_off">Off</string>
+    <string name="pods_mode_transparency">Transparency</string>
+    <string name="pods_mode_adaptive">Adaptive</string>
+    <string name="pods_mode_noise_cancellation">Noise Cancellation</string>
+
+    <string name="pods_conversation">Conversation Awareness</string>
+    <string name="pods_conversation_summary">Lowers media volume when you start speaking</string>
+    <string name="pods_ear_detection">Automatic ear detection</string>
+    <string name="pods_ear_detection_summary">Pauses media when you take an AirPod out</string>
+    <string name="pods_personalized_volume">Personalized Volume</string>
+    <string name="pods_personalized_volume_summary">Adjusts media volume to your environment</string>
+
+    <string name="pods_microphone">Microphone</string>
+    <string name="pods_mic_automatic">Automatic</string>
+    <string name="pods_mic_left">Always Left</string>
+    <string name="pods_mic_right">Always Right</string>
+</resources>

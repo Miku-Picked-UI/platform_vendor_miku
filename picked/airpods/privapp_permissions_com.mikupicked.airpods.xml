@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     PickedPods - AirPods controls for Miku-Picked UI
+     Copyright (C) 2026 Miku-Picked UI
+     SPDX-License-Identifier: GPL-3.0-or-later
+-->
+<permissions>
+    <privapp-permissions package="com.mikupicked.airpods">
+        <permission name="android.permission.BLUETOOTH_PRIVILEGED" />
+        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND" />
+    </privapp-permissions>
+</permissions>

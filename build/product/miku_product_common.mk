@@ -106,6 +106,11 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     PenguinLaboratory
 
+# [Miku-Picked UI] AirPods controls in Settings' device details (picked/airpods, GPL-3.0,
+# protocol from LibrePods)
+PRODUCT_PACKAGES += \
+    PickedPods
+
 # Charger mode images
 PRODUCT_PACKAGES += \
     charger_res_images \
