@@ -111,6 +111,11 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     PickedPods
 
+# [Miku-Picked UI] Speaker Calibrator: measures a speaker with the phone mic, writes an
+# AxionFx preset (picked/speaker_cal)
+PRODUCT_PACKAGES += \
+    PickedSpeakerCal
+
 # Charger mode images
 PRODUCT_PACKAGES += \
     charger_res_images \

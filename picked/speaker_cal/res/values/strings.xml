@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: 2026 Miku-Picked UI
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <string name="app_name">Speaker Calibrator</string>
+    <string name="intro">Measures your speaker with the phone\'s microphone and makes an AxionFx preset in the sound style you pick.</string>
+
+    <string name="section_style">Sound style</string>
+    <string name="style_studio">Studio</string>
+    <string name="style_studio_summary">Neutral and true to the recording</string>
+    <string name="style_warm">Warm</string>
+    <string name="style_warm_summary">Fuller bass and softer highs, relaxed</string>
+    <string name="style_party">Big party</string>
+    <string name="style_party_summary">Deep thump, punchy and loud, sounds like a much bigger speaker</string>
+    <string name="style_bass">Bass head</string>
+    <string name="style_bass_summary">As much bass as the speaker can take</string>
+    <string name="style_vocal">Vocal</string>
+    <string name="style_vocal_summary">Clear voices for podcasts, films and calls</string>
+
+    <string name="section_mic">Microphone</string>
+    <string name="mic_bottom">Bottom</string>
+    <string name="mic_top">Top (earpiece)</string>
+    <string name="mic_both">Both</string>
+    <string name="mic_hint">Point the chosen microphone at the speaker. If one of the phone\'s mics is broken, pick the other one.</string>
+
+    <string name="section_tone">Test tone volume</string>
+    <string name="tone_quiet">Quiet</string>
+    <string name="tone_normal">Normal</string>
+    <string name="tone_loud">Loud</string>
+
+    <string name="section_name">Speaker name</string>
+    <string name="default_name">My speaker</string>
+
+    <string name="section_ready">Before you start</string>
+    <string name="ready_steps">1. Connect the speaker and set it to a normal listening volume.\n2. In AxionFx, turn the main switch off, so the bare speaker is measured.\n3. Put the phone about 1 m in front of the speaker at ear height, the chosen mic facing it.\n4. Keep the room quiet for 11 seconds while a tone sweeps from low to high.</string>
+    <string name="fx_off">AxionFx is switched off</string>
+    <string name="start">Start measuring</string>
+    <string name="measure_again">Measure again</string>
+    <string name="cancel">Cancel</string>
+    <string name="cancelled">Cancelled.</string>
+
+    <string name="status_listening">Listening…</string>
+    <string name="status_analysing">Analysing…</string>
+
+    <string name="section_result">Result</string>
+    <string name="curve_measured">Speaker</string>
+    <string name="curve_target">Target</string>
+    <string name="curve_corrected">With preset</string>
+    <string name="result_bass_limit">The speaker plays down to about %1$d Hz (shaded below: EQ can\'t add what it can\'t play).</string>
+    <string name="result_eq">Equalizer app bands:</string>
+    <string name="result_subcut">FIR EQ sub cut: 25 Hz %1$.0f dB, 40 Hz %2$.0f dB</string>
+    <string name="save">Save preset</string>
+    <string name="share">Share</string>
+    <string name="saved">Saved Download/AxionFx/%1$s</string>
+    <string name="import_hint">To use it: AxionFx → Presets → Import, pick the file from Download/AxionFx, load it and turn AxionFx back on. You can switch the style above and save again without measuring again.</string>
+
+    <string name="err_fx_on">Turn AxionFx off first and tick the box, otherwise its effects end up in the measurement.</string>
+    <string name="err_permission">The microphone permission is needed to measure.</string>
+    <string name="err_silent">The chosen microphone hears almost nothing. Try another microphone or turn the speaker up.</string>
+    <string name="err_clipped">Too loud: the microphone overloaded. Pick a quieter test tone or turn the speaker down, then measure again.</string>
+    <string name="err_mic">Couldn\'t measure: %1$s</string>
+    <string name="err_save">Couldn\'t save: %1$s</string>
+</resources>

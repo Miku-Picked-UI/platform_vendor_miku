@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material Symbols "speaker" (Apache 2.0) on a tinted circle -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#FF3D5AFE" />
+        </shape>
+    </item>
+    <item android:top="22dp" android:bottom="22dp" android:left="22dp" android:right="22dp">
+        <vector android:width="24dp" android:height="24dp"
+            android:viewportWidth="960" android:viewportHeight="960">
+            <path android:fillColor="#FFFFFFFF"
+                android:pathData="M680,880L280,880Q247,880 223.5,856.5Q200,833 200,800L200,160Q200,127 223.5,103.5Q247,80 280,80L680,80Q713,80 736.5,103.5Q760,127 760,160L760,800Q760,833 736.5,856.5Q713,880 680,880ZM480,360Q513,360 536.5,336.5Q560,313 560,280Q560,247 536.5,223.5Q513,200 480,200Q447,200 423.5,223.5Q400,247 400,280Q400,313 423.5,336.5Q447,360 480,360ZM480,760Q563,760 621.5,701.5Q680,643 680,560Q680,477 621.5,418.5Q563,360 480,360Q397,360 338.5,418.5Q280,477 280,560Q280,643 338.5,701.5Q397,760 480,760ZM480,680Q430,680 395,645Q360,610 360,560Q360,510 395,475Q430,440 480,440Q530,440 565,475Q600,510 600,560Q600,610 565,645Q530,680 480,680Z" />
+        </vector>
+    </item>
+</layer-list>

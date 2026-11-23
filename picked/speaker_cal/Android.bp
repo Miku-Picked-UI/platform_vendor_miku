@@ -1,0 +1,15 @@
+//
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// Speaker Calibrator: measures a speaker with the phone's microphone(s) and writes an AxionFx
+// preset for a chosen sound style (the tone in the Equalizer app's bands, a sub cut in the FIR
+// EQ). Plain SDK app; build-apk.sh builds the same sources outside the tree.
+
+android_app {
+    name: "PickedSpeakerCal",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    sdk_version: "current",
+    product_specific: true,
+}
