@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 The PenguinOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.penguin.laboratory">
+
+    <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <!-- DeX's switches are secure settings the framework and SystemUI read -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <!-- The tabs write PenguinOS keys in Settings.System too -->
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+
+    <!-- The tab bar list offers every launchable app that has shown a bar -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+        <package android:name="com.crdroid.udfps.icons" />
+        <package android:name="com.crdroid.udfps.animations" />
+        <package android:name="org.evolution.udfps.icons" />
+        <!-- Miku-Picked UI: the subject cut-out (vendor/miku/picked/depth_cutout) -->
+        <package android:name="com.mikupicked.depthcutout" />
+    </queries>
+
+    <application
+        android:label="@string/laboratory_title"
+        android:icon="@drawable/ic_laboratory"
+        android:allowBackup="false"
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true"
+        android:forceQueryable="true">
+
+        <activity
+            android:name=".cos.CosExperienceActivity"
+            android:exported="false"
+            android:label="@string/cos_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".glass.LiquidGlassActivity"
+            android:exported="false"
+            android:label="@string/liquid_glass_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".glass.TabBarAppsActivity"
+            android:exported="false"
+            android:label="@string/tab_bars_apps_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".styles.StylesActivity"
+            android:exported="false"
+            android:label="@string/styles_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".styles.UdfpsPickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".experiments.ExperimentsActivity"
+            android:exported="false"
+            android:label="@string/experiments_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".dex.DexActivity"
+            android:exported="false"
+            android:label="@string/dex_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".LaboratoryActivity"
+            android:exported="true"
+            android:label="@string/laboratory_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".edgelighting.EdgeLightingActivity"
+            android:exported="true"
+            android:label="@string/edge_lighting_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".wonderland.WonderlandActivity"
+            android:exported="true"
+            android:label="@string/wonderland_title"
+            android:theme="@style/Theme.Laboratory" />
+
+        <activity
+            android:name=".wonderland.WonderlandEditorActivity"
+            android:exported="false"
+            android:label="@string/wonderland_title"
+            android:theme="@style/Theme.Laboratory"
+            android:windowSoftInputMode="adjustResize" />
+
+        <service
+            android:name=".wonderland.WonderlandWallpaperService"
+            android:exported="true"
+            android:label="@string/wonderland_title"
+            android:permission="android.permission.BIND_WALLPAPER">
+            <intent-filter>
+                <action android:name="android.service.wallpaper.WallpaperService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.service.wallpaper"
+                android:resource="@xml/wonderland_wallpaper" />
+        </service>
+
+        <!-- Apps' processes report here when the framework finds a bottom bar in them -->
+        <receiver
+            android:name=".glass.TabBarSeenReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.penguin.laboratory.action.TAB_BAR_SEEN" />
+            </intent-filter>
+        </receiver>
+
+        <!-- SystemUI reads the edge lighting style and images from here while dozing -->
+        <provider
+            android:name=".edgelighting.EdgeLightingProvider"
+            android:authorities="com.penguin.laboratory.provider"
+            android:directBootAware="true"
+            android:exported="true"
+            android:readPermission="android.permission.STATUS_BAR_SERVICE" />
+
+    </application>
+</manifest>

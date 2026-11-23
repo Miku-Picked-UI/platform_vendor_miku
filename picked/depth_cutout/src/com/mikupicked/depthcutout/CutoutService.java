@@ -7,6 +7,7 @@ package com.mikupicked.depthcutout;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -25,7 +26,8 @@ import android.util.Log;
  * {@code what}, {@code arg1} {@link #RESULT_OK} or {@link #RESULT_ERROR}, and on success
  * {@link #KEY_MASK}: one byte per pixel, 255 = subject.
  *
- * Only the system uid (Settings) may use it. The model stays loaded while bound.
+ * Only the system uid (Settings) and apps signed with the platform key (Penguin Laboratory) may
+ * use it. The model stays loaded while bound.
  */
 public class CutoutService extends Service {
 
@@ -68,9 +70,15 @@ public class CutoutService extends Service {
         super.onDestroy();
     }
 
+    private boolean isTrusted(int uid) {
+        return uid == Process.SYSTEM_UID
+                || getPackageManager().checkSignatures(Process.SYSTEM_UID, uid)
+                        == PackageManager.SIGNATURE_MATCH;
+    }
+
     private boolean handle(Message msg) {
         if (msg.what != MSG_CUTOUT || msg.replyTo == null) return true;
-        if (msg.sendingUid != Process.SYSTEM_UID) {
+        if (!isTrusted(msg.sendingUid)) {
             Log.w(TAG, "Refusing uid " + msg.sendingUid);
             return true;
         }

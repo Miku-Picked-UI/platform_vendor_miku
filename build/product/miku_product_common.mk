@@ -102,6 +102,10 @@ PRODUCT_PACKAGES += \
     PickedReactiveWallpaper \
     PickedDepthCutout
 
+# [PenguinOS] Penguin Laboratory (picked/penguin_laboratory), opened from Picked features
+PRODUCT_PACKAGES += \
+    PenguinLaboratory
+
 # Charger mode images
 PRODUCT_PACKAGES += \
     charger_res_images \

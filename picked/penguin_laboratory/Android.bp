@@ -1,0 +1,72 @@
+//
+// Copyright (C) 2026 The PenguinOS Project
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// Penguin Laboratory from PenguinOS (github.com/Project-PenguinOS/
+// penguin_packages_apps_PenguinLaboratory, branch celerity), opened from
+// Settings > Picked features. Miku-Picked UI changes: the subject cut-out runs on the ROM's own
+// PickedDepthCutout instead of ML Kit (no Play services AARs), the app is platform signed for
+// that service, and the switches are mapped to this ROM's keys.
+
+// Material Symbols icons for Compose, MIT, from Maven Central
+// (com.composables:icons-material-symbols-rounded-filled-android:2.2.1), unchanged.
+android_library_import {
+    name: "PenguinLaboratory-material-symbols-rounded-filled",
+    aars: ["libs/icons-material-symbols-rounded-filled-android-2.2.1.aar"],
+    sdk_version: "current",
+    min_sdk_version: "21",
+}
+
+android_app {
+    name: "PenguinLaboratory",
+
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+    resource_dirs: ["res"],
+
+    static_libs: [
+        "PenguinLaboratory-material-symbols-rounded-filled",
+        "androidx.activity_activity-compose",
+        "androidx.annotation_annotation",
+        "androidx.appcompat_appcompat",
+        "androidx.compose.foundation_foundation",
+        "androidx.compose.material3_material3",
+        "androidx.compose.runtime_runtime",
+        "androidx.compose.ui_ui",
+        "androidx.graphics_graphics-shapes",
+        "androidx.lifecycle_lifecycle-runtime-compose",
+        "kotlinx_coroutines_android",
+        "androidx.collection_collection",
+        "androidx.core_core",
+        "androidx.exifinterface_exifinterface",
+        "androidx.fragment_fragment",
+    ],
+
+    sdk_version: "current",
+    // Platform signed: the subject cut-out service only serves the system and platform apps
+    certificate: "platform",
+    system_ext_specific: true,
+    // For WRITE_SECURE_SETTINGS
+    privileged: true,
+    required: [
+        "PickedDepthCutout",
+        "privapp_permissions_com.penguin.laboratory",
+    ],
+
+    optimize: {
+        enabled: false,
+    },
+}
+
+prebuilt_etc {
+    name: "privapp_permissions_com.penguin.laboratory",
+    src: "privapp_permissions_com.penguin.laboratory.xml",
+    // Without the .xml suffix PackageManager skips the file and system_server dies on the
+    // missing WRITE_SECURE_SETTINGS allowlist
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}

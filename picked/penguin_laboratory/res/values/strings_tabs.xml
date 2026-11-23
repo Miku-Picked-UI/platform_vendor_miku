@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 The PenguinOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <!-- Tab bar. One short word each so six fit. -->
+    <string name="tab_originals">Originals</string>
+    <string name="tab_status">Status</string>
+    <string name="tab_status_title">Status bar &amp; shade</string>
+    <string name="tab_lock">Lock</string>
+    <string name="tab_lock_title">Lock screen</string>
+    <string name="tab_gestures">Gestures</string>
+    <string name="tab_gestures_title">Gestures &amp; buttons</string>
+    <string name="tab_sound">Sound</string>
+    <string name="tab_sound_title">Sound &amp; haptics</string>
+    <string name="tab_system">System</string>
+    <string name="tab_system_title">Display &amp; system</string>
+    <string name="tab_expand">Show all tabs</string>
+    <string name="tab_link_missing">This page isn\'t available in this version of Settings</string>
+
+    <!-- Status bar & shade -->
+    <string name="section_status_bar">Status bar</string>
+    <string name="row_network_speed">Network speed</string>
+    <string name="row_network_speed_summary">Upload and download speed next to the status icons</string>
+    <string name="row_brightness_slide">Slide to change brightness</string>
+    <string name="row_brightness_slide_summary">Slide along the status bar</string>
+    <string name="row_brightness_slide_locked">On the lock screen too</string>
+    <string name="row_status_padding">Status bar padding</string>
+    <string name="row_status_padding_summary">Space at the start and end of the status bar</string>
+    <string name="section_battery_icon">Battery icon</string>
+    <string name="row_battery_style">Style</string>
+    <string name="row_battery_percent">Percentage</string>
+    <string-array name="battery_style_labels">
+        <item>Icon</item>
+        <item>Circle</item>
+        <item>Dotted</item>
+        <item>Text</item>
+    </string-array>
+    <string-array name="battery_percent_labels">
+        <item>Hidden</item>
+        <item>Inside</item>
+        <item>Beside</item>
+    </string-array>
+    <string name="section_island">Dynamic Island</string>
+    <string name="row_island">Dynamic Island</string>
+    <string name="row_island_summary">Live activities around the camera</string>
+    <string name="row_island_more">What shows in the island</string>
+    <string name="row_island_more_summary">Calls, media, timers, charging and more</string>
+    <string name="section_quick_settings">Quick Settings</string>
+    <string name="row_qs_auto_brightness">Auto brightness button</string>
+    <string name="row_qs_auto_brightness_summary">Next to the brightness slider</string>
+    <string name="row_qs_data_usage">Data usage</string>
+    <string name="row_qs_data_usage_summary">Shown in the Quick Settings footer</string>
+    <string name="section_notifications">Notifications</string>
+    <string name="row_heads_up">Heads-up</string>
+    <string name="row_heads_up_summary">Pop-up notifications and which apps can show them</string>
+    <string name="row_heads_up_calm">Calmer heads-up</string>
+    <string name="row_heads_up_calm_summary">Only calls and messages pop up, and only when their app isn\'t open</string>
+    <string name="row_screen_on_alerts">Sound with the screen on</string>
+    <string name="row_screen_on_alerts_summary">Notifications ring and vibrate while you\'re using the phone</string>
+
+    <!-- Lock screen -->
+    <string name="section_lock_look">Look</string>
+    <string name="row_hide_clock">Hide clock</string>
+    <string name="row_hide_clock_summary">For when a widget app draws its own</string>
+    <string name="row_charging_info">Charging details</string>
+    <string name="row_charging_info_summary">Current, voltage, power and temperature while charging</string>
+    <string name="row_ripple">Fingerprint ripple</string>
+    <string name="row_ripple_summary">A ripple from the sensor when you unlock</string>
+    <string name="row_lock_timeout">Screen timeout when locked</string>
+    <string name="section_lock_more">More on the lock screen</string>
+    <string name="row_weather">Weather</string>
+    <string name="row_weather_summary">Conditions under the clock</string>
+    <string name="row_media_art">Media art</string>
+    <string name="row_media_art_summary">Album art fills the lock screen while music plays</string>
+    <string name="row_pulse">Pulse</string>
+    <string name="row_pulse_summary">A music visualiser along the bottom</string>
+    <string name="row_depth">Depth wallpaper</string>
+    <string name="row_depth_summary">The wallpaper\'s subject in front of the clock</string>
+    <string name="row_glymps">Glymps</string>
+    <string name="row_glymps_summary">A new lock screen wallpaper on a schedule</string>
+    <string name="section_lock_security">When locked</string>
+    <string name="row_lock_power_menu">Power menu</string>
+    <string name="row_lock_power_menu_summary">Open the power menu without unlocking</string>
+    <string name="row_lock_qs">Block Quick Settings</string>
+    <string name="row_lock_qs_summary">No pulling down Quick Settings on a secure lock screen</string>
+    <string name="row_lock_tiles">Sensitive tiles need unlocking</string>
+    <string name="row_lock_tiles_summary">Airplane mode, mobile data, NFC, hotspot, USB tethering and location</string>
+    <string name="row_wake_notifications">Wake for notifications</string>
+    <string name="row_wake_notifications_summary">The screen turns on when one arrives</string>
+    <string-array name="lock_timeout_labels">
+        <item>10 seconds</item>
+        <item>15 seconds</item>
+        <item>30 seconds</item>
+        <item>1 minute</item>
+        <item>2 minutes</item>
+        <item>5 minutes</item>
+        <item>10 minutes</item>
+        <item>30 minutes</item>
+    </string-array>
+
+    <!-- Gestures & buttons -->
+    <string name="section_gestures">Gestures</string>
+    <string name="row_double_tap_sleep">Double-tap to sleep</string>
+    <string name="row_double_tap_sleep_summary">On the status bar or the lock screen</string>
+    <string name="row_offscreen">Screen-off gestures</string>
+    <string name="row_offscreen_summary">Draw on the dark screen to open things</string>
+    <string name="row_quick_launch">Quick launch</string>
+    <string name="row_quick_launch_summary">Hold the fingerprint sensor to open an app</string>
+    <string name="row_screenshot_clipboard">Screenshots to clipboard</string>
+    <string name="row_screenshot_clipboard_summary">Copy instead of saving; Save in the preview keeps one</string>
+    <string name="section_buttons">Buttons</string>
+    <string name="row_volume_wake">Volume buttons wake</string>
+    <string name="row_volume_wake_summary">Press volume to turn the screen on</string>
+    <string name="row_power_menu">Power menu</string>
+    <string name="row_power_menu_summary">What holding the power button does</string>
+    <string name="row_advanced_reboot">Advanced restart</string>
+    <string name="row_advanced_reboot_summary">Recovery and bootloader in the power menu</string>
+    <string name="section_navigation">Navigation bar</string>
+    <string name="row_navbar_layout">Layout</string>
+    <string name="row_nav_hint">Gesture bar</string>
+    <string name="row_nav_hint_summary">The handle along the bottom</string>
+    <string name="row_back_arrow">Back arrow</string>
+    <string name="row_back_arrow_summary">An arrow follows your swipe</string>
+    <string name="row_back_haptic">Back haptic</string>
+    <string name="row_back_haptic_summary">A tick when back triggers</string>
+    <string name="row_ime_space">Keyboard switcher space</string>
+    <string name="row_ime_space_summary">Room under the keyboard to switch or hide it</string>
+    <string name="row_back_tweaks">Back gesture extras</string>
+    <string name="row_back_tweaks_summary">Long swipes and their actions</string>
+    <string name="section_taskbar">Taskbar</string>
+    <string name="row_taskbar">Taskbar</string>
+    <string name="row_taskbar_summary">A taskbar along the bottom, with any navigation</string>
+    <string name="row_taskbar_more">Taskbar and dock</string>
+    <string name="row_taskbar_more_summary">Auto-hide, macOS dock, glass</string>
+    <string-array name="navbar_layout_labels">
+        <item>Normal</item>
+        <item>Compact</item>
+        <item>Leaning left</item>
+        <item>Leaning right</item>
+    </string-array>
+
+    <!-- Sound & haptics -->
+    <string name="section_volume">Volume</string>
+    <string name="row_app_volume">Per-app volume</string>
+    <string name="row_app_volume_summary">A button in the volume panel for each app playing</string>
+    <string name="row_volume_side">Volume panel side</string>
+    <string name="row_multi_focus">Several apps at once</string>
+    <string name="row_multi_focus_summary">Let more than one app play sound</string>
+    <string name="row_screenshot_sound">Screenshot sound</string>
+    <string name="section_haptics">Vibration</string>
+    <string name="row_fp_success">Fingerprint accepted</string>
+    <string name="row_fp_error">Fingerprint not recognised</string>
+    <string name="row_vibrate_connect">Call connects</string>
+    <string name="row_vibrate_waiting">Call waiting</string>
+    <string name="row_vibrate_disconnect">Call ends</string>
+    <string name="row_vibration_patterns">Vibration patterns</string>
+    <string name="row_vibration_patterns_summary">Make your own for calls</string>
+    <string-array name="volume_side_labels">
+        <item>Right</item>
+        <item>Left</item>
+    </string-array>
+
+    <!-- Display & system -->
+    <string name="section_theme">Theme</string>
+    <string name="row_theme">Theme</string>
+    <string name="row_theme_summary">Visual effects, video wallpapers and Lock Glymps</string>
+    <string name="row_fonts">Fonts</string>
+    <string name="row_fonts_summary">The system font, and your own</string>
+    <string name="row_monet">Colour engine</string>
+    <string name="row_monet_summary">How your wallpaper\'s colours become the theme</string>
+    <string name="section_display">Display</string>
+    <string name="row_smart_pixels">Smart pixels</string>
+    <string name="row_smart_pixels_summary">Turn off some pixels to save power</string>
+    <string name="row_display_engine">Display engine</string>
+    <string name="row_display_engine_summary">Colour modes and the Reality engine</string>
+    <string name="row_wake_plug">Wake on plug</string>
+    <string name="row_wake_plug_summary">The screen turns on when you plug in or unplug</string>
+    <string name="section_battery">Battery</string>
+    <string name="row_idle_manager">Idle manager</string>
+    <string name="row_idle_manager_summary">Stop background apps to save battery</string>
+    <string name="row_sleep_mode">Sleep mode</string>
+    <string name="row_sleep_mode_summary">Turn off connections and sensors while you sleep</string>
+    <string name="row_power_insight">PowerInsight</string>
+    <string name="row_power_insight_summary">Battery statistics and live power use</string>
+    <string name="row_doze_wakelock_guard">Deep sleep guard</string>
+    <string name="row_doze_wakelock_guard_summary">While the phone idles, stop idle background services from keeping it awake. Music, calls, navigation and active downloads are not affected</string>
+    <string name="section_spoofing">Spoofing</string>
+    <string name="row_pif">Play Integrity</string>
+    <string name="row_pif_summary">Fingerprint and the automatic fetch</string>
+    <string name="row_tricky">TrickyStore</string>
+    <string name="row_tricky_summary">Keybox and the apps it covers</string>
+    <string name="row_games">Games</string>
+    <string name="row_games_summary">Look like another phone to unlock frame rates</string>
+    <string name="row_app_spoof">App spoofing</string>
+    <string name="row_app_spoof_summary">Pick apps that see another phone</string>
+    <string name="row_hw_spoof">CPU and GPU spoofing</string>
+    <string name="row_hw_spoof_summary">The chip each app sees, set when it starts</string>
+    <string name="section_system_more">System</string>
+    <string name="section_diagnostics">Diagnostics</string>
+    <string name="row_flightlog">Crash recorder</string>
+    <string name="row_flightlog_summary">Keeps the kernel log, system crash logs and resource use from this session and the last one, so a bug report taken after a freeze or an unexpected restart shows what happened. App logs are not recorded, nothing leaves the phone unless you share a bug report, and turning this off deletes the logs after 15 minutes</string>
+    <string name="row_secure_screenshots">Screenshots of secure apps</string>
+    <string name="row_secure_screenshots_summary">Capture apps that block it. Take care: this can expose private content.</string>
+    <string name="row_downgrade">Allow app downgrades</string>
+    <string name="row_downgrade_summary">May crash or lose an app\'s data</string>
+    <string name="row_usb_picker">USB mode picker</string>
+    <string name="row_usb_picker_summary">Ask what to do when a USB cable connects</string>
+    <string name="row_obscura">Obscura</string>
+    <string name="row_obscura_summary">App visibility, isolation and developer setting controls</string>
+</resources>

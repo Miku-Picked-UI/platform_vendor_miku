@@ -1,0 +1,28 @@
+/*
+ * SPDX-FileCopyrightText: 2026 Miku-Picked UI
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package com.penguin.laboratory
+
+/**
+ * Miku-Picked UI: which PenguinOS features behind the Laboratory's switches this ROM has. A
+ * switch whose SystemUI, framework or Launcher part isn't ported yet is hidden rather than
+ * shown doing nothing; port the part, then turn it on here.
+ */
+object Backends {
+    /** Experiments keys with a backend. */
+    val experiments: Set<String> = emptySet()
+
+    /** PenguinOS power menu styles (SystemUI globalactions PowerMenuStyle, power_menu_style). */
+    const val POWER_MENU_STYLES = false
+
+    /** Screen-off fingerprint icon and its schedule (SystemUI doze DozeUdfpsIconController). */
+    const val SCREEN_OFF_UDFPS_ICON = false
+
+    /** Dual tone shade behind notifications (penguin_liquid_glass_dual_tone). */
+    const val GLASS_DUAL_TONE = false
+
+    /** DeX dock, launchpad, Control Centre and touchpad (the PenguinDex app). */
+    const val DEX_DESKTOP_FEATURES = false
+}

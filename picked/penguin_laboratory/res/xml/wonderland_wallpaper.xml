@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2026 The PenguinOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<wallpaper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/wonderland_description"
+    android:settingsActivity="com.penguin.laboratory.wonderland.WonderlandActivity"
+    android:showMetadataInPreview="false"
+    android:supportsMultipleDisplays="true" />
