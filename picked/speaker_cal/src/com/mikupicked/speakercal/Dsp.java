@@ -134,6 +134,56 @@ final class Dsp {
         return r;
     }
 
+    /**
+     * Power average of several tests, each first leveled to its own mids, so a test that was a
+     * bit louder or closer doesn't outweigh the others. Averaging tests taken from slightly
+     * different spots also smooths out the room's peaks and dips.
+     */
+    static Response average(java.util.List<Response> runs) {
+        final Response out = new Response();
+        out.peakDb = Double.NEGATIVE_INFINITY;
+        final double[] sum = new double[GRID.length];
+        for (Response r : runs) {
+            final double ref = midRef(r.db);
+            for (int g = 0; g < GRID.length; g++) sum[g] += Math.pow(10, (r.db[g] - ref) / 10);
+            out.peakDb = Math.max(out.peakDb, r.peakDb);
+        }
+        for (int g = 0; g < GRID.length; g++) out.db[g] = 10 * Math.log10(sum[g] / runs.size());
+        return out;
+    }
+
+    /** Each test leveled to its mids, for drawing. */
+    static double[] leveled(Response r) {
+        final double ref = midRef(r.db);
+        final double[] out = new double[GRID.length];
+        for (int g = 0; g < GRID.length; g++) out[g] = r.db[g] - ref;
+        return out;
+    }
+
+    /**
+     * How much the tests disagree: the mean standard deviation (dB) between 60 Hz and 5 kHz,
+     * where the corrections are made. 0 for a single test.
+     */
+    static double spread(java.util.List<Response> runs) {
+        final int n = runs.size();
+        if (n < 2) return 0;
+        final double[][] lv = new double[n][];
+        for (int i = 0; i < n; i++) lv[i] = leveled(runs.get(i));
+        double total = 0;
+        int cnt = 0;
+        for (int g = 0; g < GRID.length; g++) {
+            if (GRID[g] < 60 || GRID[g] > 5000) continue;
+            double mean = 0;
+            for (double[] v : lv) mean += v[g];
+            mean /= n;
+            double var = 0;
+            for (double[] v : lv) var += (v[g] - mean) * (v[g] - mean);
+            total += Math.sqrt(var / (n - 1));
+            cnt++;
+        }
+        return total / cnt;
+    }
+
     /** Mean level of {@code db} between 630 Hz and 2.5 kHz: the reference "mids". */
     static double midRef(double[] db) {
         double s = 0;

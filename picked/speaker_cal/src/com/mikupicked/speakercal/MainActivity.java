@@ -11,8 +11,12 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.TypedArray;
+import android.content.res.ColorStateList;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -24,63 +28,91 @@ import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.view.Window;
+import android.view.WindowInsetsController;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.IntConsumer;
 
 public class MainActivity extends Activity {
 
     private static final int REQ_MIC = 1;
     private static final double[] TONE_AMPS = {0.03, 0.06, 0.12};
+    private static final int[] TEST_COUNTS = {1, 3, 5};
+    /** Seconds between tests, to move the phone. */
+    private static final int GAP_S = 4;
+
+    private static final Typeface MEDIUM = Typeface.create("sans-serif-medium", Typeface.NORMAL);
 
     private final Handler mMain = new Handler(Looper.getMainLooper());
     private SharedPreferences mPrefs;
+    private Palette mP;
 
-    private RadioGroup mStyles, mMics, mTones;
+    private ScrollView mScroll;
+    private int mStyle;
+    private final LinearLayout[] mStyleRows = new LinearLayout[Calibration.STYLES.length];
+    private final TextView[] mStyleNames = new TextView[Calibration.STYLES.length];
+    private final TextView[] mStyleSums = new TextView[Calibration.STYLES.length];
+    private final View[] mStyleDots = new View[Calibration.STYLES.length];
+    private Segmented mMics, mTones, mTests;
     private EditText mName;
     private CheckBox mFxOff;
-    private Button mStart, mCancel, mSave, mShare;
+    private TextView mStart, mCancel, mSave, mShare, mMessage;
+    private LinearLayout mMeasureCard, mResultCard;
     private PulseView mPulse;
     private CurveView mCurve;
-    private TextView mResultText, mMessage;
-    private LinearLayout mResultBox;
+    private BandsView mBands;
+    private TextView mBassValue, mBassLabel, mSpreadValue, mSpreadLabel, mSubcut;
 
     private Measurer mMeasurer;
-    private Dsp.Response mResponse; // last measurement
+    private Dsp.Response mResponse; // last measurement (average of its tests)
+    private double[][] mRunCurves; // its single tests, leveled, when there were several
+    private double mSpread;
     private Calibration.Result mResult;
     private Uri mSavedUri;
-
-    private int mAccent, mOnSurface;
 
     @Override
     protected void onCreate(Bundle b) {
         super.onCreate(b);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         mPrefs = getSharedPreferences("cal", MODE_PRIVATE);
-        final TypedArray ta = obtainStyledAttributes(
-                new int[] {android.R.attr.colorAccent, android.R.attr.textColorPrimary});
-        mAccent = ta.getColor(0, 0xff82b1ff);
-        mOnSurface = ta.getColor(1, 0xffffffff);
-        ta.recycle();
+        mP = new Palette(this);
+        final Window w = getWindow();
+        w.setBackgroundDrawable(new ColorDrawable(mP.bg));
+        w.setStatusBarColor(mP.bg);
+        w.setNavigationBarColor(mP.bg);
         setContentView(buildUi());
-        getWindow().getDecorView().setOnApplyWindowInsetsListener((v, insets) -> {
+        final WindowInsetsController ic = w.getInsetsController();
+        if (ic != null && !mP.night) {
+            final int light = WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                    | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
+            ic.setSystemBarsAppearance(light, light);
+        }
+        w.getDecorView().setOnApplyWindowInsetsListener((v, insets) -> {
             v.setPadding(0, insets.getSystemWindowInsetTop(), 0,
                     insets.getSystemWindowInsetBottom());
             return insets.consumeSystemWindowInsets();
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        if (mMeasurer != null) mMeasurer.cancel();
+        super.onDestroy();
+    }
+
     // ---------------------------------------------------------------------------------------
-    // UI
+    // Building blocks
     // ---------------------------------------------------------------------------------------
 
     private int dp(float v) {
@@ -88,166 +120,402 @@ public class MainActivity extends Activity {
                 getResources().getDisplayMetrics());
     }
 
-    private TextView header(int text) {
+    private GradientDrawable round(int color, float radiusDp) {
+        final GradientDrawable g = new GradientDrawable();
+        g.setColor(color);
+        g.setCornerRadius(dp(radiusDp));
+        return g;
+    }
+
+    /** Touch ripple over {@code content} (or alone when null), clipped to the same corners. */
+    private Drawable ripple(Drawable content, float radiusDp) {
+        return new RippleDrawable(ColorStateList.valueOf(Palette.alpha(mP.onSurface, 0x1f)),
+                content, round(0xffffffff, radiusDp));
+    }
+
+    private TextView text(CharSequence s, float sp, int color) {
         final TextView t = new TextView(this);
-        t.setText(text);
-        t.setTextSize(15);
-        t.setTypeface(Typeface.DEFAULT_BOLD);
-        t.setTextColor(mAccent);
-        t.setPadding(0, dp(18), 0, dp(6));
+        t.setText(s);
+        t.setTextSize(sp);
+        t.setTextColor(color);
         return t;
     }
 
-    private TextView body(CharSequence text) {
-        final TextView t = new TextView(this);
-        t.setText(text);
-        t.setTextSize(14);
-        return t;
+    private TextView text(int res, float sp, int color) {
+        return text(getString(res), sp, color);
     }
+
+    private LinearLayout.LayoutParams wrap() {
+        return new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+    }
+
+    /** A rounded card with a title and an optional line under it. */
+    private LinearLayout card(LinearLayout parent, int title, int subtitle) {
+        final LinearLayout c = new LinearLayout(this);
+        c.setOrientation(LinearLayout.VERTICAL);
+        c.setBackground(round(mP.card, 28));
+        c.setPadding(dp(20), dp(18), dp(20), dp(20));
+        final LinearLayout.LayoutParams lp = wrap();
+        lp.bottomMargin = dp(12);
+        parent.addView(c, lp);
+        if (title != 0) {
+            final TextView t = text(title, 17, mP.onSurface);
+            t.setTypeface(MEDIUM);
+            c.addView(t);
+        }
+        if (subtitle != 0) {
+            final TextView s = text(subtitle, 13, mP.onSurfaceVar);
+            s.setPadding(0, dp(2), 0, 0);
+            c.addView(s);
+        }
+        return c;
+    }
+
+    private View gap(int dp) {
+        final View v = new View(this);
+        v.setLayoutParams(new LinearLayout.LayoutParams(1, dp(dp)));
+        return v;
+    }
+
+    private TextView button(int label, boolean filled, View.OnClickListener l) {
+        final TextView b = text(label, 15, filled ? mP.onPrimary : mP.onSecondaryContainer);
+        b.setTypeface(MEDIUM);
+        b.setGravity(Gravity.CENTER);
+        b.setPadding(dp(24), 0, dp(24), 0);
+        b.setMinHeight(dp(52));
+        b.setBackground(ripple(round(filled ? mP.primary : mP.secondaryContainer, 26), 26));
+        b.setOnClickListener(l);
+        return b;
+    }
+
+    private static void setButtonEnabled(View b, boolean on) {
+        b.setEnabled(on);
+        b.setAlpha(on ? 1f : 0.38f);
+    }
+
+    /** A row of options, one picked, in a pill. */
+    private final class Segmented {
+        final LinearLayout view;
+        final TextView[] items;
+        int selected;
+        boolean enabled = true;
+
+        Segmented(int[] labels, int selected, IntConsumer onPick) {
+            view = new LinearLayout(MainActivity.this);
+            view.setBackground(round(mP.field, 24));
+            view.setPadding(dp(4), dp(4), dp(4), dp(4));
+            items = new TextView[labels.length];
+            for (int i = 0; i < labels.length; i++) {
+                final int idx = i;
+                final TextView t = text(labels[i], 14, mP.onSurfaceVar);
+                t.setGravity(Gravity.CENTER);
+                t.setSingleLine(true);
+                t.setOnClickListener(v -> {
+                    if (!enabled || idx == this.selected) return;
+                    select(idx);
+                    onPick.accept(idx);
+                });
+                items[i] = t;
+                view.addView(t, new LinearLayout.LayoutParams(0, dp(40), 1));
+            }
+            select(selected);
+        }
+
+        void select(int idx) {
+            selected = idx;
+            for (int i = 0; i < items.length; i++) {
+                final boolean on = i == idx;
+                items[i].setBackground(on ? ripple(round(mP.secondaryContainer, 20), 20)
+                        : ripple(null, 20));
+                items[i].setTextColor(on ? mP.onSecondaryContainer : mP.onSurfaceVar);
+                items[i].setTypeface(on ? MEDIUM : Typeface.DEFAULT);
+            }
+        }
+
+        void setEnabled(boolean on) {
+            enabled = on;
+            view.setAlpha(on ? 1f : 0.5f);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // UI
+    // ---------------------------------------------------------------------------------------
 
     private View buildUi() {
-        final ScrollView scroll = new ScrollView(this);
+        mScroll = new ScrollView(this);
+        mScroll.setClipToPadding(false);
         final LinearLayout col = new LinearLayout(this);
         col.setOrientation(LinearLayout.VERTICAL);
-        col.setPadding(dp(20), dp(16), dp(20), dp(32));
-        scroll.addView(col);
+        col.setPadding(dp(16), dp(20), dp(16), dp(28));
+        mScroll.addView(col);
 
-        final TextView title = new TextView(this);
-        title.setText(R.string.app_name);
-        title.setTextSize(26);
-        title.setTypeface(Typeface.DEFAULT_BOLD);
+        // Header
+        final ImageView icon = new ImageView(this);
+        icon.setImageResource(R.drawable.ic_speaker_cal);
+        final LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(dp(56), dp(56));
+        ilp.leftMargin = dp(8);
+        col.addView(icon, ilp);
+        final TextView title = text(R.string.app_name, 30, mP.onSurface);
+        title.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
+        title.setPadding(dp(8), dp(14), dp(8), 0);
         col.addView(title);
-        col.addView(body(getString(R.string.intro)));
+        final TextView intro = text(R.string.intro, 15, mP.onSurfaceVar);
+        intro.setPadding(dp(8), dp(6), dp(8), dp(20));
+        col.addView(intro);
 
         // Style
-        col.addView(header(R.string.section_style));
-        mStyles = new RadioGroup(this);
+        final LinearLayout style = card(col, R.string.section_style, 0);
+        mStyle = Math.max(0, Math.min(Calibration.STYLES.length - 1, mPrefs.getInt("style", 2)));
         for (int i = 0; i < Calibration.STYLES.length; i++) {
+            final int idx = i;
             final Calibration.Style s = Calibration.STYLES[i];
-            final RadioButton rb = new RadioButton(this);
-            rb.setId(100 + i);
-            rb.setText(getString(s.name) + "\n" + getString(s.summary));
-            rb.setPadding(dp(8), dp(6), 0, dp(6));
-            mStyles.addView(rb);
+            final LinearLayout row = new LinearLayout(this);
+            row.setGravity(Gravity.CENTER_VERTICAL);
+            row.setPadding(dp(16), dp(12), dp(16), dp(12));
+            final View dot = new View(this);
+            final LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(dp(20), dp(20));
+            dlp.rightMargin = dp(16);
+            row.addView(dot, dlp);
+            final LinearLayout texts = new LinearLayout(this);
+            texts.setOrientation(LinearLayout.VERTICAL);
+            final TextView name = text(s.name, 15, mP.onSurface);
+            name.setTypeface(MEDIUM);
+            final TextView sum = text(s.summary, 13, mP.onSurfaceVar);
+            texts.addView(name);
+            texts.addView(sum);
+            row.addView(texts, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            row.setOnClickListener(v -> selectStyle(idx));
+            final LinearLayout.LayoutParams rlp = wrap();
+            rlp.topMargin = dp(i == 0 ? 12 : 6);
+            style.addView(row, rlp);
+            mStyleRows[i] = row;
+            mStyleNames[i] = name;
+            mStyleSums[i] = sum;
+            mStyleDots[i] = dot;
         }
-        mStyles.check(100 + mPrefs.getInt("style", 2));
-        mStyles.setOnCheckedChangeListener((g, id) -> {
-            mPrefs.edit().putInt("style", id - 100).apply();
-            if (mResponse != null) showResult(); // re-solve, no new measurement needed
-        });
-        col.addView(mStyles);
+        updateStyleRows();
 
         // Microphone
-        col.addView(header(R.string.section_mic));
-        mMics = new RadioGroup(this);
-        mMics.setOrientation(RadioGroup.HORIZONTAL);
-        final int[] micNames = {R.string.mic_bottom, R.string.mic_top, R.string.mic_both};
-        for (int i = 0; i < 3; i++) {
-            final RadioButton rb = new RadioButton(this);
-            rb.setId(200 + i);
-            rb.setText(micNames[i]);
-            rb.setPadding(dp(4), 0, dp(16), 0);
-            mMics.addView(rb);
-        }
-        mMics.check(200 + mPrefs.getInt("mic", Measurer.MIC_TOP));
-        mMics.setOnCheckedChangeListener((g, id) -> mPrefs.edit().putInt("mic", id - 200).apply());
-        col.addView(mMics);
-        col.addView(body(getString(R.string.mic_hint)));
+        final LinearLayout mic = card(col, R.string.section_mic, R.string.mic_hint);
+        mMics = new Segmented(new int[] {R.string.mic_bottom, R.string.mic_top, R.string.mic_both},
+                clamp(mPrefs.getInt("mic", Measurer.MIC_TOP), 3),
+                i -> mPrefs.edit().putInt("mic", i).apply());
+        mic.addView(gap(12));
+        mic.addView(mMics.view, wrap());
 
         // Test tone volume
-        col.addView(header(R.string.section_tone));
-        mTones = new RadioGroup(this);
-        mTones.setOrientation(RadioGroup.HORIZONTAL);
-        final int[] toneNames = {R.string.tone_quiet, R.string.tone_normal, R.string.tone_loud};
-        for (int i = 0; i < 3; i++) {
-            final RadioButton rb = new RadioButton(this);
-            rb.setId(300 + i);
-            rb.setText(toneNames[i]);
-            rb.setPadding(dp(4), 0, dp(16), 0);
-            mTones.addView(rb);
-        }
-        mTones.check(300 + mPrefs.getInt("tone", 1));
-        mTones.setOnCheckedChangeListener((g, id) -> mPrefs.edit().putInt("tone", id - 300).apply());
-        col.addView(mTones);
+        final LinearLayout tone = card(col, R.string.section_tone, R.string.tone_hint);
+        mTones = new Segmented(new int[] {R.string.tone_quiet, R.string.tone_normal, R.string.tone_loud},
+                clamp(mPrefs.getInt("tone", 1), 3),
+                i -> mPrefs.edit().putInt("tone", i).apply());
+        tone.addView(gap(12));
+        tone.addView(mTones.view, wrap());
+
+        // Number of tests
+        final LinearLayout tests = card(col, R.string.section_tests, R.string.tests_hint);
+        mTests = new Segmented(new int[] {R.string.tests_1, R.string.tests_3, R.string.tests_5},
+                clamp(mPrefs.getInt("tests", 1), 3),
+                i -> mPrefs.edit().putInt("tests", i).apply());
+        tests.addView(gap(12));
+        tests.addView(mTests.view, wrap());
 
         // Speaker name
-        col.addView(header(R.string.section_name));
+        final LinearLayout nameCard = card(col, R.string.section_name, R.string.name_hint);
         mName = new EditText(this);
         mName.setSingleLine(true);
         mName.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_WORDS);
         mName.setText(mPrefs.getString("name", getString(R.string.default_name)));
-        col.addView(mName);
+        mName.setTextColor(mP.onSurface);
+        mName.setHint(R.string.default_name);
+        mName.setHintTextColor(Palette.alpha(mP.onSurfaceVar, 0x99));
+        mName.setTextSize(16);
+        mName.setBackground(round(mP.field, 16));
+        mName.setPadding(dp(16), dp(14), dp(16), dp(14));
+        nameCard.addView(gap(12));
+        nameCard.addView(mName, wrap());
 
-        // Before you start
-        col.addView(header(R.string.section_ready));
-        col.addView(body(getString(R.string.ready_steps)));
+        // Before you start + measuring
+        mMeasureCard = card(col, R.string.section_ready, 0);
+        final int[] steps = {R.string.step_connect, R.string.step_fx, R.string.step_place,
+                R.string.step_quiet};
+        for (int i = 0; i < steps.length; i++) {
+            final LinearLayout row = new LinearLayout(this);
+            row.setPadding(0, dp(12), 0, 0);
+            final TextView badge = text(String.valueOf(i + 1), 12, mP.onPrimaryContainer);
+            badge.setTypeface(Typeface.DEFAULT_BOLD);
+            badge.setGravity(Gravity.CENTER);
+            final GradientDrawable circle = new GradientDrawable();
+            circle.setShape(GradientDrawable.OVAL);
+            circle.setColor(mP.primaryContainer);
+            badge.setBackground(circle);
+            final LinearLayout.LayoutParams blp = new LinearLayout.LayoutParams(dp(24), dp(24));
+            blp.rightMargin = dp(14);
+            row.addView(badge, blp);
+            row.addView(text(steps[i], 14, mP.onSurface),
+                    new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+            mMeasureCard.addView(row);
+        }
         mFxOff = new CheckBox(this);
         mFxOff.setText(R.string.fx_off);
-        col.addView(mFxOff);
-
-        final LinearLayout buttons = new LinearLayout(this);
-        buttons.setPadding(0, dp(12), 0, 0);
-        mStart = new Button(this);
-        mStart.setText(R.string.start);
-        mStart.setOnClickListener(v -> start());
-        mCancel = new Button(this);
-        mCancel.setText(R.string.cancel);
-        mCancel.setVisibility(View.GONE);
-        mCancel.setOnClickListener(v -> {
-            if (mMeasurer != null) mMeasurer.cancel();
-        });
-        buttons.addView(mStart);
-        buttons.addView(mCancel);
-        col.addView(buttons);
-
-        mMessage = body("");
-        mMessage.setPadding(0, dp(8), 0, 0);
-        col.addView(mMessage);
+        mFxOff.setTextColor(mP.onSurface);
+        mFxOff.setTextSize(15);
+        mFxOff.setButtonTintList(ColorStateList.valueOf(mP.primary));
+        final LinearLayout.LayoutParams clp = wrap();
+        clp.topMargin = dp(10);
+        mMeasureCard.addView(mFxOff, clp);
 
         mPulse = new PulseView(this, null);
-        mPulse.setColors(mAccent, mOnSurface);
+        mPulse.setColors(mP.primary, mP.onSurface);
         mPulse.setVisibility(View.GONE);
-        col.addView(mPulse, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(300)));
+        mMeasureCard.addView(mPulse, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(320)));
 
-        // Result
-        mResultBox = new LinearLayout(this);
-        mResultBox.setOrientation(LinearLayout.VERTICAL);
-        mResultBox.setVisibility(View.GONE);
-        mResultBox.addView(header(R.string.section_result));
+        mStart = button(R.string.start, true, v -> start());
+        mCancel = button(R.string.cancel, false, v -> {
+            if (mMeasurer != null) mMeasurer.cancel();
+        });
+        mCancel.setVisibility(View.GONE);
+        final LinearLayout.LayoutParams slp = wrap();
+        slp.topMargin = dp(14);
+        mMeasureCard.addView(mStart, slp);
+        mMeasureCard.addView(mCancel, wrap());
+
+        mMessage = text("", 14, mP.error);
+        mMessage.setPadding(dp(4), dp(10), dp(4), 0);
+        mMessage.setVisibility(View.GONE);
+        mMeasureCard.addView(mMessage);
+
+        buildResult(col);
+        return mScroll;
+    }
+
+    private void buildResult(LinearLayout col) {
+        mResultCard = card(col, R.string.section_result, 0);
+        mResultCard.setVisibility(View.GONE);
+
+        // Two stat tiles
+        final LinearLayout tiles = new LinearLayout(this);
+        final LinearLayout.LayoutParams tlp = wrap();
+        tlp.topMargin = dp(12);
+        mResultCard.addView(tiles, tlp);
+        final TextView[] bass = tile(tiles, false);
+        mBassValue = bass[0];
+        mBassLabel = bass[1];
+        mBassLabel.setText(R.string.tile_bass_label);
+        final TextView[] spread = tile(tiles, true);
+        mSpreadValue = spread[0];
+        mSpreadLabel = spread[1];
+
         mCurve = new CurveView(this, null);
-        mCurve.setColors(mOnSurface, 0xffef9a9a, (mOnSurface & 0x00ffffff) | 0x99000000, mAccent);
-        mCurve.setNames(getString(R.string.curve_measured), getString(R.string.curve_target),
-                getString(R.string.curve_corrected));
-        mResultBox.addView(mCurve, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp(260)));
-        mResultText = body("");
-        mResultText.setPadding(0, dp(8), 0, 0);
-        mResultText.setTypeface(Typeface.MONOSPACE);
-        mResultText.setTextSize(12);
-        mResultBox.addView(mResultText);
+        mCurve.setColors(mP.onSurface, mP.measured, Palette.alpha(mP.onSurface, 0x99), mP.primary);
+        final LinearLayout.LayoutParams glp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(260));
+        glp.topMargin = dp(18);
+        mResultCard.addView(mCurve, glp);
+        final TextView hint = text(R.string.result_graph_hint, 12, mP.onSurfaceVar);
+        hint.setPadding(0, dp(6), 0, 0);
+        mResultCard.addView(hint);
+
+        final TextView eq = text(R.string.result_eq, 15, mP.onSurface);
+        eq.setTypeface(MEDIUM);
+        eq.setPadding(0, dp(20), 0, dp(4));
+        mResultCard.addView(eq);
+        mBands = new BandsView(this, null);
+        mBands.setColors(mP);
+        mResultCard.addView(mBands, new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, dp(180)));
+        mSubcut = text("", 13, mP.onSurfaceVar);
+        mSubcut.setPadding(0, dp(6), 0, 0);
+        mResultCard.addView(mSubcut);
+
         final LinearLayout save = new LinearLayout(this);
-        save.setPadding(0, dp(8), 0, 0);
-        mSave = new Button(this);
-        mSave.setText(R.string.save);
-        mSave.setOnClickListener(v -> save());
-        mShare = new Button(this);
-        mShare.setText(R.string.share);
-        mShare.setEnabled(false);
-        mShare.setOnClickListener(v -> share());
-        save.addView(mSave);
-        save.addView(mShare);
-        mResultBox.addView(save);
-        mResultBox.addView(body(getString(R.string.import_hint)));
-        col.addView(mResultBox);
-        return scroll;
+        final LinearLayout.LayoutParams svlp = wrap();
+        svlp.topMargin = dp(18);
+        mResultCard.addView(save, svlp);
+        mSave = button(R.string.save, true, v -> save());
+        mShare = button(R.string.share, false, v -> share());
+        setButtonEnabled(mShare, false);
+        final LinearLayout.LayoutParams b1 = new LinearLayout.LayoutParams(0,
+                ViewGroup.LayoutParams.WRAP_CONTENT, 1);
+        b1.rightMargin = dp(10);
+        save.addView(mSave, b1);
+        save.addView(mShare, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+
+        final TextView imp = text(R.string.import_hint, 13, mP.onSurfaceVar);
+        imp.setPadding(0, dp(14), 0, 0);
+        mResultCard.addView(imp);
+    }
+
+    /** A stat tile: {value, label}. */
+    private TextView[] tile(LinearLayout parent, boolean last) {
+        final LinearLayout t = new LinearLayout(this);
+        t.setOrientation(LinearLayout.VERTICAL);
+        t.setBackground(round(mP.primaryContainer, 20));
+        t.setPadding(dp(16), dp(14), dp(16), dp(14));
+        final TextView value = text("", 22, mP.onPrimaryContainer);
+        value.setTypeface(MEDIUM);
+        final TextView label = text("", 12, Palette.alpha(mP.onPrimaryContainer, 0xcc));
+        t.addView(value);
+        t.addView(label);
+        final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0,
+                ViewGroup.LayoutParams.MATCH_PARENT, 1);
+        if (!last) lp.rightMargin = dp(10);
+        parent.addView(t, lp);
+        return new TextView[] {value, label};
+    }
+
+    private static int clamp(int v, int n) {
+        return Math.max(0, Math.min(n - 1, v));
+    }
+
+    private void selectStyle(int idx) {
+        if (idx == mStyle) return;
+        mStyle = idx;
+        mPrefs.edit().putInt("style", idx).apply();
+        updateStyleRows();
+        if (mResponse != null) showResult(); // re-solve, no new measurement needed
+    }
+
+    private void updateStyleRows() {
+        for (int i = 0; i < mStyleRows.length; i++) {
+            final boolean on = i == mStyle;
+            final GradientDrawable bg = round(on ? mP.primaryContainer : 0, 20);
+            if (!on) bg.setStroke(dp(1), Palette.alpha(mP.outline, 0x66));
+            mStyleRows[i].setBackground(ripple(bg, 20));
+            mStyleNames[i].setTextColor(on ? mP.onPrimaryContainer : mP.onSurface);
+            mStyleSums[i].setTextColor(on ? Palette.alpha(mP.onPrimaryContainer, 0xcc)
+                    : mP.onSurfaceVar);
+            final GradientDrawable dot = new GradientDrawable();
+            dot.setShape(GradientDrawable.OVAL);
+            if (on) {
+                dot.setColor(mP.primary);
+                dot.setStroke(dp(5), mP.primaryContainer);
+                final GradientDrawable ring = new GradientDrawable();
+                ring.setShape(GradientDrawable.OVAL);
+                ring.setStroke(dp(2), mP.primary);
+                mStyleDots[i].setBackground(new android.graphics.drawable.LayerDrawable(
+                        new Drawable[] {dot, ring}));
+            } else {
+                dot.setStroke(dp(2), mP.outline);
+                mStyleDots[i].setBackground(dot);
+            }
+        }
     }
 
     // ---------------------------------------------------------------------------------------
     // Measuring
     // ---------------------------------------------------------------------------------------
 
+    private void showMessage(CharSequence m) {
+        mMessage.setText(m);
+        mMessage.setVisibility(m == null || m.length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
     private void start() {
         if (!mFxOff.isChecked()) {
-            mMessage.setText(R.string.err_fx_on);
+            showMessage(getString(R.string.err_fx_on));
             return;
         }
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
@@ -256,65 +524,105 @@ public class MainActivity extends Activity {
             return;
         }
         mPrefs.edit().putString("name", mName.getText().toString().trim()).apply();
-        final int mic = mMics.getCheckedRadioButtonId() - 200;
-        final double amp = TONE_AMPS[mTones.getCheckedRadioButtonId() - 300];
+        final int mic = mMics.selected;
+        final double amp = TONE_AMPS[mTones.selected];
+        final int n = TEST_COUNTS[mTests.selected];
 
-        mMessage.setText("");
-        mResultBox.setVisibility(View.GONE);
+        showMessage(null);
+        mResultCard.setVisibility(View.GONE);
         mStart.setVisibility(View.GONE);
         mCancel.setVisibility(View.VISIBLE);
         mPulse.reset();
+        mPulse.setStep(n > 1 ? getString(R.string.status_step, 1, n) : "");
         mPulse.setStatus(getString(R.string.status_listening));
         mPulse.setVisibility(View.VISIBLE);
         setInputsEnabled(false);
+        mScroll.post(() -> mScroll.smoothScrollTo(0, mMeasureCard.getTop() + mPulse.getTop() - dp(24)));
 
         mMeasurer = new Measurer();
         final Measurer m = mMeasurer;
         new Thread(() -> {
+            final List<Dsp.Response> runs = new ArrayList<>();
+            int test = 0;
             try {
-                final Measurer.Recording rec = m.run(amp, mic,
-                        (p, hz, lvl) -> mPulse.update(p, hz, lvl));
-                mMain.post(() -> mPulse.setStatus(getString(R.string.status_analysing)));
-                final float chPeak = mic == Measurer.MIC_BOTTOM ? rec.channelPeak[0]
-                        : mic == Measurer.MIC_TOP ? rec.channelPeak[1]
-                        : Math.max(rec.channelPeak[0], rec.channelPeak[1]);
-                if (chPeak < 0.01f) {
-                    finish(getString(R.string.err_silent), false);
-                    return;
+                for (test = 0; test < n; test++) {
+                    final int t = test;
+                    if (t > 0) {
+                        // Countdown to move the phone a little
+                        mPulse.setStep(getString(R.string.status_next, t + 1, n));
+                        mPulse.setStatus(getString(R.string.status_move));
+                        mPulse.update((float) t / n, 0, 0);
+                        for (int s = GAP_S; s > 0; s--) {
+                            mPulse.setCenter(String.valueOf(s));
+                            for (int k = 0; k < 10; k++) {
+                                if (m.isCancelled()) throw new InterruptedException();
+                                Thread.sleep(100);
+                            }
+                        }
+                        mPulse.setCenter(null);
+                        mPulse.setStep(getString(R.string.status_step, t + 1, n));
+                        mPulse.setStatus(getString(R.string.status_listening));
+                    }
+                    final Measurer.Recording rec = m.run(amp, mic,
+                            (p, hz, lvl) -> mPulse.update((t + p) / n, hz, lvl));
+                    mPulse.setStatus(getString(R.string.status_analysing));
+                    final float chPeak = mic == Measurer.MIC_BOTTOM ? rec.channelPeak[0]
+                            : mic == Measurer.MIC_TOP ? rec.channelPeak[1]
+                            : Math.max(rec.channelPeak[0], rec.channelPeak[1]);
+                    if (chPeak < 0.01f) {
+                        done(inTest(t, n, getString(R.string.err_silent)), false);
+                        return;
+                    }
+                    if (rec.clipped > 0) {
+                        done(inTest(t, n, getString(R.string.err_clipped)), false);
+                        return;
+                    }
+                    runs.add(Dsp.measure(rec.signal, amp));
                 }
-                if (rec.clipped > 0) {
-                    finish(getString(R.string.err_clipped), false);
-                    return;
+                final Dsp.Response avg = n == 1 ? runs.get(0) : Dsp.average(runs);
+                final double spread = Dsp.spread(runs);
+                final double[][] curves;
+                if (n > 1) {
+                    curves = new double[n][];
+                    for (int i = 0; i < n; i++) curves[i] = Dsp.leveled(runs.get(i));
+                } else {
+                    curves = null;
                 }
-                final Dsp.Response resp = Dsp.measure(rec.signal, amp);
                 mMain.post(() -> {
-                    mResponse = resp;
+                    mResponse = avg;
+                    mRunCurves = curves;
+                    mSpread = spread;
                     showResult();
+                    mScroll.post(() -> mScroll.smoothScrollTo(0, mResultCard.getTop() - dp(12)));
                 });
-                finish(null, true);
+                done(null, true);
             } catch (InterruptedException e) {
-                finish(getString(R.string.cancelled), false);
+                done(getString(R.string.cancelled), false);
             } catch (Exception e) {
-                finish(getString(R.string.err_mic, e.getMessage()), false);
+                done(inTest(test, n, getString(R.string.err_mic, e.getMessage())), false);
             }
         }, "SpeakerCal").start();
     }
 
-    private void finish(String message, boolean ok) {
+    private String inTest(int test, int n, String msg) {
+        return n > 1 ? getString(R.string.err_in_test, test + 1, msg) : msg;
+    }
+
+    private void done(String message, boolean ok) {
         mMain.post(() -> {
             mPulse.setVisibility(View.GONE);
             mCancel.setVisibility(View.GONE);
             mStart.setVisibility(View.VISIBLE);
             mStart.setText(ok ? R.string.measure_again : R.string.start);
             setInputsEnabled(true);
-            if (message != null) mMessage.setText(message);
+            showMessage(message);
         });
     }
 
     private void setInputsEnabled(boolean on) {
-        for (RadioGroup g : new RadioGroup[] {mMics, mTones}) {
-            for (int i = 0; i < g.getChildCount(); i++) g.getChildAt(i).setEnabled(on);
-        }
+        mMics.setEnabled(on);
+        mTones.setEnabled(on);
+        mTests.setEnabled(on);
         mName.setEnabled(on);
         mFxOff.setEnabled(on);
     }
@@ -324,7 +632,7 @@ public class MainActivity extends Activity {
         if (req == REQ_MIC && grants.length > 0 && grants[0] == PackageManager.PERMISSION_GRANTED) {
             start();
         } else {
-            mMessage.setText(R.string.err_permission);
+            showMessage(getString(R.string.err_permission));
         }
     }
 
@@ -333,28 +641,38 @@ public class MainActivity extends Activity {
     // ---------------------------------------------------------------------------------------
 
     private Calibration.Style style() {
-        return Calibration.STYLES[mStyles.getCheckedRadioButtonId() - 100];
+        return Calibration.STYLES[mStyle];
     }
 
     private void showResult() {
-        final Calibration.Style s = style();
-        mResult = Calibration.solve(mResponse, s);
+        mResult = Calibration.solve(mResponse, style());
         mSavedUri = null;
-        mShare.setEnabled(false);
+        setButtonEnabled(mShare, false);
+
+        final int n = mRunCurves == null ? 1 : mRunCurves.length;
+        mCurve.setNames(getString(n > 1 ? R.string.curve_measured_avg : R.string.curve_measured),
+                getString(R.string.curve_target), getString(R.string.curve_corrected));
+        mCurve.setRuns(mRunCurves);
         mCurve.setData(mResult.measured, mResult.target, mResult.corrected, mResult.bassLimitHz);
-        final StringBuilder sb = new StringBuilder();
-        sb.append(getString(R.string.result_bass_limit, (int) Math.round(mResult.bassLimitHz)))
-                .append("\n\n").append(getString(R.string.result_eq)).append('\n');
-        final String[] labels = {"63", "125", "250", "500", "1k", "2k", "4k", "8k", "16k"};
-        for (int i = 0; i < 9; i++) {
-            sb.append(String.format(Locale.ROOT, "%5s Hz  %+5.1f dB\n", labels[i], mResult.soundEq[i]));
+        mBands.setGains(mResult.soundEq);
+
+        mBassValue.setText(getString(R.string.tile_bass_value, (int) Math.round(mResult.bassLimitHz)));
+        if (n > 1) {
+            mSpreadValue.setText(getString(R.string.tile_spread_value, mSpread));
+            mSpreadLabel.setText(getString(mSpread < 1.5 ? R.string.tile_spread_good
+                    : mSpread < 3 ? R.string.tile_spread_ok : R.string.tile_spread_bad, n));
+        } else {
+            mSpreadValue.setText(R.string.tile_single_value);
+            mSpreadLabel.setText(R.string.tile_single_label);
         }
+
         if (mResult.fir[0] != 0 || mResult.fir[1] != 0) {
-            sb.append('\n').append(getString(R.string.result_subcut,
-                    mResult.fir[0], mResult.fir[1]));
+            mSubcut.setText(getString(R.string.result_subcut, mResult.fir[0], mResult.fir[1]));
+            mSubcut.setVisibility(View.VISIBLE);
+        } else {
+            mSubcut.setVisibility(View.GONE);
         }
-        mResultText.setText(sb.toString());
-        mResultBox.setVisibility(View.VISIBLE);
+        mResultCard.setVisibility(View.VISIBLE);
     }
 
     private String fileName() {
@@ -377,7 +695,7 @@ public class MainActivity extends Activity {
                 os.write(json.getBytes(StandardCharsets.UTF_8));
             }
             mSavedUri = uri;
-            mShare.setEnabled(true);
+            setButtonEnabled(mShare, true);
             Toast.makeText(this, getString(R.string.saved, fileName()), Toast.LENGTH_LONG).show();
         } catch (Exception e) {
             Toast.makeText(this, getString(R.string.err_save, e.getMessage()), Toast.LENGTH_LONG).show();

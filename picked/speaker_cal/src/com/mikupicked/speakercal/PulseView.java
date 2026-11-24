@@ -8,7 +8,9 @@ package com.mikupicked.speakercal;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -16,7 +18,8 @@ import java.util.Locale;
 
 /**
  * What the screen shows while measuring: rings that pulse outwards with the microphone level,
- * a progress arc, the frequency the sweep is at and the mic level in dB.
+ * a progress arc over all tests, the frequency the sweep is at and the mic level in dB, and a
+ * countdown between tests.
  */
 public class PulseView extends View {
 
@@ -34,7 +37,10 @@ public class PulseView extends View {
     private float mSmoothLevel;
     private final float[] mRings = {0f, 0.33f, 0.66f};
     private long mLast;
-    private String mStatus = "";
+    private volatile String mStatus = "";
+    private volatile String mStep = "";
+    private volatile String mCenter;
+    private float mCoreFor = -1;
     private int mAccent = 0xff82b1ff;
 
     public PulseView(Context c, AttributeSet a) {
@@ -62,9 +68,22 @@ public class PulseView extends View {
         mLevel = level;
     }
 
+    /** Any thread. */
     void setStatus(String s) {
         mStatus = s;
-        invalidate();
+        postInvalidate();
+    }
+
+    /** Line above the status, like "Test 2 of 3"; any thread. */
+    void setStep(String s) {
+        mStep = s;
+        postInvalidate();
+    }
+
+    /** Big text shown instead of the frequency (the countdown), null for the frequency. */
+    void setCenter(String s) {
+        mCenter = s;
+        postInvalidate();
     }
 
     void reset() {
@@ -73,6 +92,8 @@ public class PulseView extends View {
         mLevel = 0;
         mSmoothLevel = 0;
         mStatus = "";
+        mStep = "";
+        mCenter = null;
         invalidate();
     }
 
@@ -82,9 +103,9 @@ public class PulseView extends View {
         final float dt = mLast == 0 ? 0 : Math.min(0.05f, (now - mLast) / 1e9f);
         mLast = now;
         final float w = getWidth(), h = getHeight();
-        final float cx = w / 2, cy = h / 2;
-        final float maxR = Math.min(w, h) / 2 * 0.92f;
         final float density = getResources().getDisplayMetrics().density;
+        final float cx = w / 2, cy = h / 2 + density * 12;
+        final float maxR = Math.min(w, h - density * 48) / 2 * 0.95f;
 
         // Mic level 0..1 on a dB scale (-60..0 dBFS), smoothed
         final double db = 20 * Math.log10(mLevel + 1e-6);
@@ -104,7 +125,12 @@ public class PulseView extends View {
 
         // Core grows with the level
         final float coreR = maxR * (0.28f + 0.08f * mSmoothLevel);
-        mCore.setColor((mAccent & 0x00ffffff) | 0x33000000);
+        if (mCoreFor != maxR) {
+            mCoreFor = maxR;
+            mCore.setShader(new RadialGradient(cx, cy, maxR * 0.36f,
+                    (mAccent & 0x00ffffff) | 0x55000000, (mAccent & 0x00ffffff) | 0x14000000,
+                    Shader.TileMode.CLAMP));
+        }
         c.drawCircle(cx, cy, coreR, mCore);
 
         // Progress arc
@@ -120,13 +146,22 @@ public class PulseView extends View {
         mText.setTextSize(density * 26);
         mSmall.setTextSize(density * 13);
         final double hz = mHz;
-        final String f = hz <= 0 ? "—" : hz >= 1000
+        final String center = mCenter;
+        final String f = center != null ? center : hz <= 0 ? "—" : hz >= 1000
                 ? String.format(Locale.ROOT, "%.1f kHz", hz / 1000)
                 : String.format(Locale.ROOT, "%.0f Hz", hz);
         c.drawText(f, cx, cy + density * 6, mText);
-        c.drawText(String.format(Locale.ROOT, "mic %.0f dB", Math.max(-60, db)), cx,
-                cy + density * 28, mSmall);
-        if (!mStatus.isEmpty()) c.drawText(mStatus, cx, cy - density * 26, mSmall);
+        if (center == null) {
+            c.drawText(String.format(Locale.ROOT, "mic %.0f dB", Math.max(-60, db)), cx,
+                    cy + density * 28, mSmall);
+        }
+        final String status = mStatus, step = mStep;
+        if (!status.isEmpty()) c.drawText(status, cx, cy - density * 26, mSmall);
+        // Step and hints go above/below the rings, they're too long for the middle
+        if (!step.isEmpty()) {
+            mText.setTextSize(density * 15);
+            c.drawText(step, cx, density * 18, mText);
+        }
 
         if (isShown()) postInvalidateOnAnimation();
     }

@@ -21,20 +21,31 @@
 
     <string name="section_mic">Microphone</string>
     <string name="mic_bottom">Bottom</string>
-    <string name="mic_top">Top (earpiece)</string>
+    <string name="mic_top">Top</string>
     <string name="mic_both">Both</string>
-    <string name="mic_hint">Point the chosen microphone at the speaker. If one of the phone\'s mics is broken, pick the other one.</string>
+    <string name="mic_hint">Top is the earpiece mic. Point it at the speaker. If one of the phone\'s mics is broken, pick the other one.</string>
 
     <string name="section_tone">Test tone volume</string>
     <string name="tone_quiet">Quiet</string>
     <string name="tone_normal">Normal</string>
     <string name="tone_loud">Loud</string>
+    <string name="tone_hint">Normal suits most speakers. Pick Quiet if it says the mic overloaded.</string>
+
+    <string name="section_tests">Number of tests</string>
+    <string name="tests_1">1 test</string>
+    <string name="tests_3">3 tests</string>
+    <string name="tests_5">5 tests</string>
+    <string name="tests_hint">More tests average out noise and the room. Move the phone a hand\'s width between tests; there\'s a short countdown to do it.</string>
 
     <string name="section_name">Speaker name</string>
+    <string name="name_hint">Used for the preset\'s file name</string>
     <string name="default_name">My speaker</string>
 
     <string name="section_ready">Before you start</string>
-    <string name="ready_steps">1. Connect the speaker and set it to a normal listening volume.\n2. In AxionFx, turn the main switch off, so the bare speaker is measured.\n3. Put the phone about 1 m in front of the speaker at ear height, the chosen mic facing it.\n4. Keep the room quiet for 11 seconds while a tone sweeps from low to high.</string>
+    <string name="step_connect">Connect the speaker and set it to a normal listening volume.</string>
+    <string name="step_fx">In AxionFx, turn the main switch off so the bare speaker is measured.</string>
+    <string name="step_place">Put the phone about 1 m in front of the speaker at ear height, the chosen mic facing it.</string>
+    <string name="step_quiet">Keep the room quiet. Each test sweeps a tone from low to high for about 11 seconds.</string>
     <string name="fx_off">AxionFx is switched off</string>
     <string name="start">Start measuring</string>
     <string name="measure_again">Measure again</string>
@@ -43,13 +54,26 @@
 
     <string name="status_listening">Listening…</string>
     <string name="status_analysing">Analysing…</string>
+    <string name="status_step">Test %1$d of %2$d</string>
+    <string name="status_next">Next: test %1$d of %2$d</string>
+    <string name="status_move">Move the phone a little</string>
+    <string name="err_in_test">Test %1$d: %2$s</string>
 
     <string name="section_result">Result</string>
     <string name="curve_measured">Speaker</string>
+    <string name="curve_measured_avg">Speaker (avg)</string>
     <string name="curve_target">Target</string>
     <string name="curve_corrected">With preset</string>
-    <string name="result_bass_limit">The speaker plays down to about %1$d Hz (shaded below: EQ can\'t add what it can\'t play).</string>
-    <string name="result_eq">Equalizer app bands:</string>
+    <string name="result_graph_hint">Shaded: below what the speaker can play. EQ can\'t add bass there, so it\'s cut instead to keep the woofer clean.</string>
+    <string name="result_eq">Equalizer app bands</string>
+    <string name="tile_bass_value">%1$d Hz</string>
+    <string name="tile_bass_label">Plays down to</string>
+    <string name="tile_spread_value">±%1$.1f dB</string>
+    <string name="tile_spread_good">%1$d tests, close match</string>
+    <string name="tile_spread_ok">%1$d tests, some spread</string>
+    <string name="tile_spread_bad">%1$d tests disagree: noisy room?</string>
+    <string name="tile_single_value">1 test</string>
+    <string name="tile_single_label">Run 3 for a steadier result</string>
     <string name="result_subcut">FIR EQ sub cut: 25 Hz %1$.0f dB, 40 Hz %2$.0f dB</string>
     <string name="save">Save preset</string>
     <string name="share">Share</string>

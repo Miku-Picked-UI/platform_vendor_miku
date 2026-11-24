@@ -37,6 +37,10 @@ final class Measurer {
         mCancelled = true;
     }
 
+    boolean isCancelled() {
+        return mCancelled;
+    }
+
     /** Blocks for about 11 seconds. Throws if the microphone can't be opened. */
     Recording run(double amp, int mic, Listener l) throws Exception {
         final int rate = Dsp.RATE;
