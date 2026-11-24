@@ -5,7 +5,7 @@
 -->
 <resources>
     <string name="app_name">Speaker Calibrator</string>
-    <string name="intro">Measures your speaker with the phone\'s microphone and makes an AxionFx preset in the sound style you pick.</string>
+    <string name="intro">Measures your speaker with the phone\'s microphone, or looks up the published measurements of your speaker or headphones, and makes an AxionFx preset in the sound style you pick.</string>
 
     <string name="section_style">Sound style</string>
     <string name="style_studio">Studio</string>
@@ -18,6 +18,30 @@
     <string name="style_bass_summary">As much bass as the speaker can take</string>
     <string name="style_vocal">Vocal</string>
     <string name="style_vocal_summary">Clear voices for podcasts, films and calls</string>
+    <string name="style_shp">Like speakerheadphone</string>
+    <string name="style_shp_summary">Your own preset\'s sound: big warm bass, tube warmth, exciter and clarity for bite</string>
+    <string name="style_shp_summary_hp">Your own preset\'s sound on any headphones: big warm bass kept tight by tube, exciter and clarity</string>
+    <string name="style_studio_summary_hp">Neutral: the target the headphones were measured against</string>
+    <string name="style_warm_summary_hp">Fuller low end and softer highs for long listening</string>
+    <string name="style_party_summary_hp">Club sub-bass you feel, smooth highs, loud and big</string>
+    <string name="style_bass_summary_hp">Deep rumble down to 25 Hz, as much as they can take</string>
+    <string name="style_vocal_summary_hp">Clear voices for podcasts, films and calls</string>
+
+    <string name="section_lookup">Look up your model</string>
+    <string name="lookup_hint">Type the model of your headphones, earbuds or speaker to tune from its published measurements, without measuring. Headphones from AutoEq, speakers from spinorama.org.</string>
+    <string name="lookup_field">e.g. Galaxy Buds, AirPods Pro, JBL Flip</string>
+    <string name="lookup_loading">Downloading the list of models… (once, a few MB)</string>
+    <string name="lookup_count">%1$d headphones and %2$d speakers to search</string>
+    <string name="lookup_none">No model matches \"%1$s\". Try fewer words, or measure it below.</string>
+    <string name="lookup_more">%1$d more: type more of the name</string>
+    <string name="lookup_fetching">Getting the curve of %1$s…</string>
+    <string name="lookup_using">Tuned from the published curve of %1$s. Pick another style above at any time.</string>
+    <string name="lookup_error">Couldn\'t reach the database: %1$s</string>
+    <string name="lookup_retry">Try again</string>
+    <string name="kind_headphones">Headphones</string>
+    <string name="kind_speaker">Speaker</string>
+    <string name="or_measure">Or measure it</string>
+    <string name="or_measure_hint">For speakers that aren\'t listed, or to include your room</string>
 
     <string name="section_mic">Microphone</string>
     <string name="mic_bottom">Bottom</string>
@@ -37,7 +61,7 @@
     <string name="tests_5">5 tests</string>
     <string name="tests_hint">More tests average out noise and the room. Move the phone a hand\'s width between tests; there\'s a short countdown to do it.</string>
 
-    <string name="section_name">Speaker name</string>
+    <string name="section_name">Preset name</string>
     <string name="name_hint">Used for the preset\'s file name</string>
     <string name="default_name">My speaker</string>
 
@@ -62,6 +86,7 @@
     <string name="section_result">Result</string>
     <string name="curve_measured">Speaker</string>
     <string name="curve_measured_avg">Speaker (avg)</string>
+    <string name="curve_published">Published</string>
     <string name="curve_target">Target</string>
     <string name="curve_corrected">With preset</string>
     <string name="result_graph_hint">Shaded: below what the speaker can play. EQ can\'t add bass there, so it\'s cut instead to keep the woofer clean.</string>
@@ -74,7 +99,11 @@
     <string name="tile_spread_bad">%1$d tests disagree: noisy room?</string>
     <string name="tile_single_value">1 test</string>
     <string name="tile_single_label">Run 3 for a steadier result</string>
+    <string name="tile_source_label">Measured by</string>
+    <string name="result_graph_hint_db">Published curve, leveled to its mids. Shaded: below what it can play.</string>
+    <string name="result_headphones">Tuned for headphones: sub-bass on the FIR EQ\'s 25 and 40 Hz bands, and gentler highs because they play right at your ear (peaks are cut, dips only nudged, no exciter or clarity).</string>
     <string name="result_subcut">FIR EQ sub cut: 25 Hz %1$.0f dB, 40 Hz %2$.0f dB</string>
+    <string name="result_subbass">FIR EQ sub-bass: 25 Hz %1$+.1f dB, 40 Hz %2$+.1f dB</string>
     <string name="save">Save preset</string>
     <string name="share">Share</string>
     <string name="saved">Saved Download/AxionFx/%1$s</string>

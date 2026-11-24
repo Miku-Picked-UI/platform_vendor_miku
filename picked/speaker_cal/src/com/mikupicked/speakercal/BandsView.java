@@ -5,12 +5,14 @@
 
 package com.mikupicked.speakercal;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 
 import java.util.Locale;
 
@@ -27,7 +29,9 @@ public class BandsView extends View {
     private final Paint mLabel = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mValue = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF mRect = new RectF();
-    private double[] mGains;
+    private double[] mGains, mFrom;
+    private float mT = 1;
+    private ValueAnimator mAnim;
 
     public BandsView(Context c, AttributeSet a) {
         super(c, a);
@@ -51,13 +55,40 @@ public class BandsView extends View {
     }
 
     void setGains(double[] gains) {
+        final double[] shown = shown();
+        final boolean animate = shown != null && gains != null && shown.length == gains.length
+                && isShown();
+        mFrom = shown;
         mGains = gains;
-        invalidate();
+        if (mAnim != null) mAnim.cancel();
+        if (!animate) {
+            mT = 1;
+            invalidate();
+            return;
+        }
+        mT = 0;
+        mAnim = ValueAnimator.ofFloat(0, 1);
+        mAnim.setDuration(380);
+        mAnim.setInterpolator(new DecelerateInterpolator(1.6f));
+        mAnim.addUpdateListener(a -> {
+            mT = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        mAnim.start();
+    }
+
+    /** The gains as drawn right now, part way through an animation. */
+    private double[] shown() {
+        if (mGains == null || mFrom == null || mT >= 1 || mFrom.length != mGains.length) return mGains;
+        final double[] out = new double[mGains.length];
+        for (int i = 0; i < out.length; i++) out[i] = mFrom[i] + (mGains[i] - mFrom[i]) * mT;
+        return out;
     }
 
     @Override
     protected void onDraw(Canvas c) {
-        if (mGains == null) return;
+        final double[] gains = shown();
+        if (gains == null) return;
         final float d = getResources().getDisplayMetrics().density;
         final float w = getWidth();
         final float top = 18 * d, bottom = getHeight() - 34 * d;
@@ -72,8 +103,8 @@ public class BandsView extends View {
         }
         c.drawLine(0, mid, w, mid, mZero);
 
-        for (int i = 0; i < LABELS.length && i < mGains.length; i++) {
-            final double g = mGains[i];
+        for (int i = 0; i < LABELS.length && i < gains.length; i++) {
+            final double g = gains[i];
             final float cx = col * (i + 0.5f);
             final float y = mid - (float) (Math.max(-1, Math.min(1, g / RANGE_DB)) * half);
             float y0 = Math.min(y, mid), y1 = Math.max(y, mid);

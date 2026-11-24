@@ -5,6 +5,7 @@
 
 package com.mikupicked.speakercal;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
@@ -14,6 +15,7 @@ import android.graphics.Path;
 import android.graphics.Shader;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 
 /**
  * The result graph on a log-frequency axis (20 Hz - 20 kHz, ±20 dB around the mids): what the
@@ -36,6 +38,12 @@ public class CurveView extends View {
     private double[][] mRuns;
     private int mFillTop, mFillH;
     private double mBassLimit;
+    // Animating from the previous curves to new ones
+    private double[] mFromMeas, mFromTgt, mFromCorr;
+    private double mFromBass;
+    private float mT = 1;
+    private ValueAnimator mAnim;
+    private double[] mDrawMeas, mDrawTgt, mDrawCorr;
     private String[] mNames = {"Measured", "Target", "With preset"};
 
     public CurveView(Context c, AttributeSet a) {
@@ -80,11 +88,40 @@ public class CurveView extends View {
     }
 
     void setData(double[] measured, double[] target, double[] corrected, double bassLimit) {
+        // Start from what is on screen now (mid-animation too)
+        mFromMeas = lerp(mFromMeas, mMeas, mT);
+        mFromTgt = lerp(mFromTgt, mTgt, mT);
+        mFromCorr = lerp(mFromCorr, mCorr, mT);
+        mFromBass = mFromBass + (mBassLimit - mFromBass) * mT;
+        final boolean animate = mMeas != null && isShown();
         mMeas = measured;
         mTgt = target;
         mCorr = corrected;
         mBassLimit = bassLimit;
-        invalidate();
+        if (mAnim != null) mAnim.cancel();
+        if (!animate) {
+            mT = 1;
+            invalidate();
+            return;
+        }
+        mT = 0;
+        mAnim = ValueAnimator.ofFloat(0, 1);
+        mAnim.setDuration(380);
+        mAnim.setInterpolator(new DecelerateInterpolator(1.6f));
+        mAnim.addUpdateListener(a -> {
+            mT = (float) a.getAnimatedValue();
+            invalidate();
+        });
+        mAnim.start();
+    }
+
+    /** {@code a} towards {@code b} by {@code t}; {@code b} alone when there's no {@code a}. */
+    private static double[] lerp(double[] a, double[] b, float t) {
+        if (b == null) return null;
+        if (a == null || a.length != b.length || t >= 1) return b;
+        final double[] out = new double[b.length];
+        for (int i = 0; i < b.length; i++) out[i] = a[i] + (b[i] - a[i]) * t;
+        return out;
     }
 
     private float x(double f, float l, float w) {
@@ -114,14 +151,19 @@ public class CurveView extends View {
             c.drawLine(xx, t, xx, t + h, mGrid);
             c.drawText(fl[i], xx - 6 * d, t + h + 13 * d, mLabel);
         }
-        if (mBassLimit > 0) {
+        mDrawMeas = lerp(mFromMeas, mMeas, mT);
+        mDrawTgt = lerp(mFromTgt, mTgt, mT);
+        mDrawCorr = lerp(mFromCorr, mCorr, mT);
+        final double bass = mT >= 1 || mFromBass <= 0 ? mBassLimit
+                : mFromBass + (mBassLimit - mFromBass) * mT;
+        if (bass > 0) {
             // Shade what the speaker can't play
-            c.drawRect(l, t, x(mBassLimit, l, w), t + h, mShade);
+            c.drawRect(l, t, x(bass, l, w), t + h, mShade);
         }
         if (mRuns != null) {
             for (double[] run : mRuns) drawCurve(c, run, mRun, l, t, w, h);
         }
-        if (mCorr != null) {
+        if (mDrawCorr != null) {
             // Soft fill under the "with preset" curve
             if (mFillH != (int) h || mFillTop != (int) t) {
                 mFillH = (int) h;
@@ -130,15 +172,15 @@ public class CurveView extends View {
                 mFill.setShader(new LinearGradient(0, t, 0, t + h,
                         (col & 0x00ffffff) | 0x38000000, col & 0x00ffffff, Shader.TileMode.CLAMP));
             }
-            buildPath(mCorr, l, t, w, h);
-            mPath.lineTo(x(Dsp.GRID[mCorr.length - 1], l, w), t + h);
+            buildPath(mDrawCorr, l, t, w, h);
+            mPath.lineTo(x(Dsp.GRID[mDrawCorr.length - 1], l, w), t + h);
             mPath.lineTo(x(Dsp.GRID[0], l, w), t + h);
             mPath.close();
             c.drawPath(mPath, mFill);
         }
-        drawCurve(c, mTgt, mTarget, l, t, w, h);
-        drawCurve(c, mMeas, mMeasured, l, t, w, h);
-        drawCurve(c, mCorr, mCorrected, l, t, w, h);
+        drawCurve(c, mDrawTgt, mTarget, l, t, w, h);
+        drawCurve(c, mDrawMeas, mMeasured, l, t, w, h);
+        drawCurve(c, mDrawCorr, mCorrected, l, t, w, h);
 
         // Legend
         float lx = l;

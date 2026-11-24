@@ -257,6 +257,61 @@ final class Dsp {
         return 10 * Math.log10((nr * nr + ni * ni) / (dr * dr + di * di));
     }
 
+    /** Biquad types, numbered like spinorama.org's EQ data. */
+    static final int LOWPASS = 0, HIGHPASS = 1, BANDPASS = 2, PEAK = 3, NOTCH = 4, LOWSHELF = 5,
+            HIGHSHELF = 6;
+
+    /** Magnitude in dB at {@code f} of an RBJ cookbook biquad of {@code type}. */
+    static double biquadDb(int type, double fc, double q, double gainDb, double f) {
+        if (type == PEAK) return peakingDb(fc, q, gainDb, f);
+        final double A = Math.pow(10, gainDb / 40), sa = Math.sqrt(A);
+        final double w0 = 2 * Math.PI * fc / RATE;
+        final double alpha = Math.sin(w0) / (2 * q);
+        final double c = Math.cos(w0);
+        final double b0, b1, b2, a0, a1, a2;
+        switch (type) {
+            case LOWPASS:
+                b0 = (1 - c) / 2; b1 = 1 - c; b2 = (1 - c) / 2;
+                a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha;
+                break;
+            case HIGHPASS:
+                b0 = (1 + c) / 2; b1 = -(1 + c); b2 = (1 + c) / 2;
+                a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha;
+                break;
+            case BANDPASS:
+                b0 = alpha; b1 = 0; b2 = -alpha;
+                a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha;
+                break;
+            case NOTCH:
+                b0 = 1; b1 = -2 * c; b2 = 1;
+                a0 = 1 + alpha; a1 = -2 * c; a2 = 1 - alpha;
+                break;
+            case LOWSHELF:
+                b0 = A * ((A + 1) - (A - 1) * c + 2 * sa * alpha);
+                b1 = 2 * A * ((A - 1) - (A + 1) * c);
+                b2 = A * ((A + 1) - (A - 1) * c - 2 * sa * alpha);
+                a0 = (A + 1) + (A - 1) * c + 2 * sa * alpha;
+                a1 = -2 * ((A - 1) + (A + 1) * c);
+                a2 = (A + 1) + (A - 1) * c - 2 * sa * alpha;
+                break;
+            case HIGHSHELF:
+                b0 = A * ((A + 1) + (A - 1) * c + 2 * sa * alpha);
+                b1 = -2 * A * ((A - 1) + (A + 1) * c);
+                b2 = A * ((A + 1) + (A - 1) * c - 2 * sa * alpha);
+                a0 = (A + 1) - (A - 1) * c + 2 * sa * alpha;
+                a1 = 2 * ((A - 1) - (A + 1) * c);
+                a2 = (A + 1) - (A - 1) * c - 2 * sa * alpha;
+                break;
+            default:
+                return 0;
+        }
+        final double w = 2 * Math.PI * f / RATE;
+        final double cw = Math.cos(w), sw = Math.sin(w), c2 = Math.cos(2 * w), s2 = Math.sin(2 * w);
+        final double nr = b0 + b1 * cw + b2 * c2, ni = -(b1 * sw + b2 * s2);
+        final double dr = a0 + a1 * cw + a2 * c2, di = -(a1 * sw + a2 * s2);
+        return 10 * Math.log10((nr * nr + ni * ni) / (dr * dr + di * di) + 1e-30);
+    }
+
     /** Summed response of a bank of peaking filters at {@code f}. */
     static double bankDb(double[] freqs, double q, double[] gains, double f) {
         double s = 0;

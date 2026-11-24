@@ -23,13 +23,17 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowInsetsController;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -64,6 +68,7 @@ public class MainActivity extends Activity {
     private final TextView[] mStyleNames = new TextView[Calibration.STYLES.length];
     private final TextView[] mStyleSums = new TextView[Calibration.STYLES.length];
     private final View[] mStyleDots = new View[Calibration.STYLES.length];
+    private final TextView[] mStyleChips = new TextView[Calibration.STYLES.length];
     private Segmented mMics, mTones, mTests;
     private EditText mName;
     private CheckBox mFxOff;
@@ -80,6 +85,17 @@ public class MainActivity extends Activity {
     private double mSpread;
     private Calibration.Result mResult;
     private Uri mSavedUri;
+
+    // Looking up a model
+    private static final int MAX_MATCHES = 8;
+    private EditText mLookup;
+    private TextView mLookupStatus, mLookupRetry, mResultHint, mHeadphoneNote;
+    private LinearLayout mLookupList;
+    private List<Library.Model> mModels;
+    private boolean mModelsLoading;
+    private int mLookupGen;
+    private Library.Profile mProfile; // the result is from a published curve when set
+    private final Runnable mFilter = this::filterModels;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -297,6 +313,15 @@ public class MainActivity extends Activity {
         }
         updateStyleRows();
 
+        buildLookup(col);
+
+        final TextView or = text(R.string.or_measure, 20, mP.onSurface);
+        or.setPadding(dp(8), dp(16), dp(8), 0);
+        col.addView(or);
+        final TextView orHint = text(R.string.or_measure_hint, 14, mP.onSurfaceVar);
+        orHint.setPadding(dp(8), dp(2), dp(8), dp(12));
+        col.addView(orHint);
+
         // Microphone
         final LinearLayout mic = card(col, R.string.section_mic, R.string.mic_hint);
         mMics = new Segmented(new int[] {R.string.mic_bottom, R.string.mic_top, R.string.mic_both},
@@ -388,12 +413,205 @@ public class MainActivity extends Activity {
         mMeasureCard.addView(mMessage);
 
         buildResult(col);
+        updateStyleRows();
         return mScroll;
+    }
+
+    private void buildLookup(LinearLayout col) {
+        final LinearLayout c = card(col, R.string.section_lookup, R.string.lookup_hint);
+        mLookup = new EditText(this);
+        mLookup.setSingleLine(true);
+        mLookup.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        mLookup.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
+        mLookup.setHint(R.string.lookup_field);
+        mLookup.setHintTextColor(Palette.alpha(mP.onSurfaceVar, 0x99));
+        mLookup.setTextColor(mP.onSurface);
+        mLookup.setTextSize(16);
+        mLookup.setBackground(round(mP.field, 16));
+        mLookup.setPadding(dp(16), dp(14), dp(16), dp(14));
+        mLookup.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int a, int b, int d) {}
+            @Override public void onTextChanged(CharSequence s, int a, int b, int d) {}
+            @Override public void afterTextChanged(Editable e) {
+                mMain.removeCallbacks(mFilter);
+                mMain.postDelayed(mFilter, 200);
+            }
+        });
+        mLookup.setOnEditorActionListener((v, id, ev) -> {
+            if (id != EditorInfo.IME_ACTION_SEARCH) return false;
+            mMain.removeCallbacks(mFilter);
+            filterModels();
+            hideKeyboard();
+            return true;
+        });
+        mLookup.setOnFocusChangeListener((v, has) -> {
+            if (has) loadModels(); // start downloading while they type
+        });
+        c.addView(gap(12));
+        c.addView(mLookup, wrap());
+
+        mLookupList = new LinearLayout(this);
+        mLookupList.setOrientation(LinearLayout.VERTICAL);
+        c.addView(mLookupList, wrap());
+
+        mLookupStatus = text("", 13, mP.onSurfaceVar);
+        mLookupStatus.setPadding(dp(4), dp(10), dp(4), 0);
+        mLookupStatus.setVisibility(View.GONE);
+        c.addView(mLookupStatus);
+
+        mLookupRetry = button(R.string.lookup_retry, false, v -> loadModels());
+        mLookupRetry.setVisibility(View.GONE);
+        final LinearLayout.LayoutParams rlp = wrap();
+        rlp.topMargin = dp(10);
+        c.addView(mLookupRetry, rlp);
+    }
+
+    private void setLookupStatus(CharSequence s, boolean error) {
+        mLookupStatus.setText(s);
+        mLookupStatus.setTextColor(error ? mP.error : mP.onSurfaceVar);
+        mLookupStatus.setVisibility(s == null || s.length() == 0 ? View.GONE : View.VISIBLE);
+    }
+
+    private void hideKeyboard() {
+        final InputMethodManager imm = getSystemService(InputMethodManager.class);
+        if (imm != null) imm.hideSoftInputFromWindow(mLookup.getWindowToken(), 0);
+    }
+
+    private void loadModels() {
+        if (mModels != null || mModelsLoading) return;
+        mModelsLoading = true;
+        mLookupRetry.setVisibility(View.GONE);
+        setLookupStatus(getString(R.string.lookup_loading), false);
+        new Thread(() -> {
+            List<Library.Model> models = null;
+            String err = null;
+            try {
+                models = Library.load(getApplicationContext());
+            } catch (Exception e) {
+                err = e.getMessage() != null ? e.getMessage() : e.toString();
+            }
+            final List<Library.Model> m = models;
+            final String error = err;
+            mMain.post(() -> {
+                mModelsLoading = false;
+                if (isDestroyed()) return;
+                if (m == null) {
+                    setLookupStatus(getString(R.string.lookup_error, error), true);
+                    mLookupRetry.setVisibility(View.VISIBLE);
+                    return;
+                }
+                mModels = m;
+                filterModels();
+            });
+        }, "ModelList").start();
+    }
+
+    private void filterModels() {
+        mLookupList.removeAllViews();
+        final String q = mLookup.getText().toString().trim();
+        if (mModels == null) {
+            if (!q.isEmpty()) loadModels();
+            return;
+        }
+        if (q.isEmpty()) {
+            int h = 0;
+            for (Library.Model m : mModels) if (m.kind == Library.HEADPHONES) h++;
+            setLookupStatus(getString(R.string.lookup_count, h, mModels.size() - h), false);
+            return;
+        }
+        final List<Library.Model> all = Library.search(mModels, q, Integer.MAX_VALUE);
+        if (all.isEmpty()) {
+            setLookupStatus(getString(R.string.lookup_none, q), false);
+            return;
+        }
+        for (int i = 0; i < all.size() && i < MAX_MATCHES; i++) addModelRow(all.get(i));
+        setLookupStatus(all.size() > MAX_MATCHES
+                ? getString(R.string.lookup_more, all.size() - MAX_MATCHES) : null, false);
+    }
+
+    private void addModelRow(Library.Model m) {
+        final LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.VERTICAL);
+        row.setPadding(dp(16), dp(10), dp(16), dp(10));
+        final GradientDrawable bg = round(0, 16);
+        bg.setStroke(dp(1), Palette.alpha(mP.outline, 0x55));
+        row.setBackground(ripple(bg, 16));
+        final TextView name = text(m.name, 15, mP.onSurface);
+        name.setTypeface(MEDIUM);
+        final String kind = getString(m.kind == Library.HEADPHONES
+                ? R.string.kind_headphones : R.string.kind_speaker);
+        final TextView detail = text(m.kind == Library.HEADPHONES ? kind + " · " + m.detail
+                : m.detail.substring(0, 1).toUpperCase() + m.detail.substring(1) + " · " + m.source,
+                13, mP.onSurfaceVar);
+        row.addView(name);
+        row.addView(detail);
+        row.setOnClickListener(v -> pickModel(m));
+        final LinearLayout.LayoutParams lp = wrap();
+        lp.topMargin = dp(8);
+        mLookupList.addView(row, lp);
+    }
+
+    private void pickModel(Library.Model m) {
+        hideKeyboard();
+        mLookupList.removeAllViews();
+        setLookupStatus(getString(R.string.lookup_fetching, m.name), false);
+        final int gen = ++mLookupGen;
+        new Thread(() -> {
+            Library.Profile p = null;
+            String err = null;
+            try {
+                p = Library.profile(m);
+            } catch (Exception e) {
+                err = e.getMessage() != null ? e.getMessage() : e.toString();
+            }
+            final Library.Profile profile = p;
+            final String error = err;
+            mMain.post(() -> {
+                if (gen != mLookupGen || isDestroyed()) return;
+                if (profile == null) {
+                    setLookupStatus(getString(R.string.lookup_error, error), true);
+                    return;
+                }
+                mProfile = profile;
+                mResponse = null;
+                mRunCurves = null;
+                mName.setText(m.name);
+                mPrefs.edit().putString("name", m.name).apply();
+                setLookupStatus(getString(R.string.lookup_using, m.name), false);
+                showResult();
+                mScroll.post(() -> mScroll.smoothScrollTo(0, mResultCard.getTop() - dp(12)));
+            });
+        }, "ModelCurve").start();
     }
 
     private void buildResult(LinearLayout col) {
         mResultCard = card(col, R.string.section_result, 0);
         mResultCard.setVisibility(View.GONE);
+
+        // The style again, right by the graph, so switching shows the change at once
+        final android.widget.HorizontalScrollView chipScroll =
+                new android.widget.HorizontalScrollView(this);
+        chipScroll.setHorizontalScrollBarEnabled(false);
+        chipScroll.setClipToPadding(false);
+        final LinearLayout chips = new LinearLayout(this);
+        chipScroll.addView(chips);
+        for (int i = 0; i < Calibration.STYLES.length; i++) {
+            final int idx = i;
+            final TextView chip = text(Calibration.STYLES[i].name, 14, mP.onSurfaceVar);
+            chip.setGravity(Gravity.CENTER);
+            chip.setSingleLine(true);
+            chip.setPadding(dp(16), 0, dp(16), 0);
+            chip.setMinHeight(dp(36));
+            chip.setOnClickListener(v -> selectStyle(idx));
+            final LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, dp(36));
+            if (i > 0) lp.leftMargin = dp(8);
+            chips.addView(chip, lp);
+            mStyleChips[i] = chip;
+        }
+        final LinearLayout.LayoutParams clp = wrap();
+        clp.topMargin = dp(12);
+        mResultCard.addView(chipScroll, clp);
 
         // Two stat tiles
         final LinearLayout tiles = new LinearLayout(this);
@@ -414,9 +632,9 @@ public class MainActivity extends Activity {
                 ViewGroup.LayoutParams.MATCH_PARENT, dp(260));
         glp.topMargin = dp(18);
         mResultCard.addView(mCurve, glp);
-        final TextView hint = text(R.string.result_graph_hint, 12, mP.onSurfaceVar);
-        hint.setPadding(0, dp(6), 0, 0);
-        mResultCard.addView(hint);
+        mResultHint = text(R.string.result_graph_hint, 12, mP.onSurfaceVar);
+        mResultHint.setPadding(0, dp(6), 0, 0);
+        mResultCard.addView(mResultHint);
 
         final TextView eq = text(R.string.result_eq, 15, mP.onSurface);
         eq.setTypeface(MEDIUM);
@@ -429,6 +647,9 @@ public class MainActivity extends Activity {
         mSubcut = text("", 13, mP.onSurfaceVar);
         mSubcut.setPadding(0, dp(6), 0, 0);
         mResultCard.addView(mSubcut);
+        mHeadphoneNote = text(R.string.result_headphones, 13, mP.onSurfaceVar);
+        mHeadphoneNote.setPadding(0, dp(6), 0, 0);
+        mResultCard.addView(mHeadphoneNote);
 
         final LinearLayout save = new LinearLayout(this);
         final LinearLayout.LayoutParams svlp = wrap();
@@ -475,16 +696,28 @@ public class MainActivity extends Activity {
         mStyle = idx;
         mPrefs.edit().putInt("style", idx).apply();
         updateStyleRows();
-        if (mResponse != null) showResult(); // re-solve, no new measurement needed
+        if (mResponse != null || mProfile != null) showResult(); // re-solve, no new measurement needed
     }
 
     private void updateStyleRows() {
+        for (int i = 0; i < mStyleChips.length; i++) {
+            if (mStyleChips[i] == null) break;
+            final boolean on = i == mStyle;
+            final GradientDrawable bg = round(on ? mP.secondaryContainer : 0, 18);
+            if (!on) bg.setStroke(dp(1), Palette.alpha(mP.outline, 0x77));
+            mStyleChips[i].setBackground(ripple(bg, 18));
+            mStyleChips[i].setTextColor(on ? mP.onSecondaryContainer : mP.onSurfaceVar);
+            mStyleChips[i].setTypeface(on ? MEDIUM : Typeface.DEFAULT);
+        }
         for (int i = 0; i < mStyleRows.length; i++) {
             final boolean on = i == mStyle;
             final GradientDrawable bg = round(on ? mP.primaryContainer : 0, 20);
             if (!on) bg.setStroke(dp(1), Palette.alpha(mP.outline, 0x66));
             mStyleRows[i].setBackground(ripple(bg, 20));
             mStyleNames[i].setTextColor(on ? mP.onPrimaryContainer : mP.onSurface);
+            final Calibration.Style st = Calibration.STYLES[i];
+            mStyleSums[i].setText(mProfile != null && mProfile.headphones && st.hpSummary != 0
+                    ? st.hpSummary : st.summary);
             mStyleSums[i].setTextColor(on ? Palette.alpha(mP.onPrimaryContainer, 0xcc)
                     : mP.onSurfaceVar);
             final GradientDrawable dot = new GradientDrawable();
@@ -589,6 +822,9 @@ public class MainActivity extends Activity {
                     curves = null;
                 }
                 mMain.post(() -> {
+                    mProfile = null;
+                    ++mLookupGen; // drop a model curve still on its way
+                    setLookupStatus(null, false);
                     mResponse = avg;
                     mRunCurves = curves;
                     mSpread = spread;
@@ -645,19 +881,29 @@ public class MainActivity extends Activity {
     }
 
     private void showResult() {
-        mResult = Calibration.solve(mResponse, style());
+        mResult = mProfile != null ? Calibration.solve(mProfile, style())
+                : Calibration.solve(mResponse, style());
         mSavedUri = null;
         setButtonEnabled(mShare, false);
 
         final int n = mRunCurves == null ? 1 : mRunCurves.length;
-        mCurve.setNames(getString(n > 1 ? R.string.curve_measured_avg : R.string.curve_measured),
+        mCurve.setNames(getString(mProfile != null ? R.string.curve_published
+                        : n > 1 ? R.string.curve_measured_avg : R.string.curve_measured),
                 getString(R.string.curve_target), getString(R.string.curve_corrected));
+        mResultHint.setText(mProfile != null ? R.string.result_graph_hint_db
+                : R.string.result_graph_hint);
+        mHeadphoneNote.setVisibility(mProfile != null && mProfile.headphones
+                ? View.VISIBLE : View.GONE);
+        updateStyleRows(); // headphone or speaker wording
         mCurve.setRuns(mRunCurves);
         mCurve.setData(mResult.measured, mResult.target, mResult.corrected, mResult.bassLimitHz);
         mBands.setGains(mResult.soundEq);
 
         mBassValue.setText(getString(R.string.tile_bass_value, (int) Math.round(mResult.bassLimitHz)));
-        if (n > 1) {
+        if (mProfile != null) {
+            mSpreadValue.setText(mProfile.source);
+            mSpreadLabel.setText(R.string.tile_source_label);
+        } else if (n > 1) {
             mSpreadValue.setText(getString(R.string.tile_spread_value, mSpread));
             mSpreadLabel.setText(getString(mSpread < 1.5 ? R.string.tile_spread_good
                     : mSpread < 3 ? R.string.tile_spread_ok : R.string.tile_spread_bad, n));
@@ -667,7 +913,8 @@ public class MainActivity extends Activity {
         }
 
         if (mResult.fir[0] != 0 || mResult.fir[1] != 0) {
-            mSubcut.setText(getString(R.string.result_subcut, mResult.fir[0], mResult.fir[1]));
+            mSubcut.setText(getString(mResult.headphones ? R.string.result_subbass
+                    : R.string.result_subcut, mResult.fir[0], mResult.fir[1]));
             mSubcut.setVisibility(View.VISIBLE);
         } else {
             mSubcut.setVisibility(View.GONE);
