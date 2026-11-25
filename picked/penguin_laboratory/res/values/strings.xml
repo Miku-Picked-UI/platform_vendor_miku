@@ -201,7 +201,8 @@
     <string name="styles_volume_oneui">One UI</string>
     <string name="styles_volume_myui">MyUI</string>
     <string name="styles_power_title">Power menu</string>
-    <string name="styles_power_penguin">Penguin</string>
+    <!-- Miku-Picked UI: style 0 is this ROM's own power menu -->
+    <string name="styles_power_penguin">Default</string>
     <string name="styles_power_ios">iOS</string>
     <string name="styles_udfps_title">Fingerprint</string>
     <string name="styles_udfps_icon">Fingerprint icon</string>

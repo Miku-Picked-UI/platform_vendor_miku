@@ -15,7 +15,7 @@ object Backends {
     val experiments: Set<String> = emptySet()
 
     /** PenguinOS power menu styles (SystemUI globalactions PowerMenuStyle, power_menu_style). */
-    const val POWER_MENU_STYLES = false
+    const val POWER_MENU_STYLES = true
 
     /** Screen-off fingerprint icon and its schedule (SystemUI doze DozeUdfpsIconController). */
     const val SCREEN_OFF_UDFPS_ICON = false
