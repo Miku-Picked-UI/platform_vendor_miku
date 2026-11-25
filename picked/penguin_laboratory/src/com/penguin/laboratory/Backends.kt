@@ -25,7 +25,7 @@ object Backends {
     const val SCREEN_OFF_UDFPS_ICON = false
 
     /** Dual tone shade behind notifications (penguin_liquid_glass_dual_tone). */
-    const val GLASS_DUAL_TONE = false
+    const val GLASS_DUAL_TONE = true
 
     /** DeX dock, launchpad, Control Centre and touchpad (the PenguinDex app). */
     const val DEX_DESKTOP_FEATURES = false
