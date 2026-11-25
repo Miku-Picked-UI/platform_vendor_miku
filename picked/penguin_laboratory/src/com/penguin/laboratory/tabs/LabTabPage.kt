@@ -12,6 +12,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -68,7 +69,9 @@ fun LabTabPage(tab: LabTab, padding: PaddingValues, state: LazyListState, genera
     val toggles = remember(generation) { mutableStateMapOf<String, Boolean>() }
     val choices = remember(generation) { mutableStateMapOf<String, String>() }
     val largeScreen = LocalConfiguration.current.smallestScreenWidthDp >= 600
-    LazyColumn(state = state, contentPadding = padding) {
+    // Fill the page: a pager centres a page shorter than the screen, which left a gap under
+    // the title on short tabs.
+    LazyColumn(modifier = Modifier.fillMaxSize(), state = state, contentPadding = padding) {
         tab.sections.filter { largeScreen || !it.largeScreenOnly }.forEach { section ->
             section.title?.let { item { SectionHeader(stringResource(it)) } }
             item {

@@ -568,12 +568,17 @@ class StylesActivity : ComponentActivity() {
     ) {
         val options = listOfNotNull(default?.first) + choices.map { it.value }
         val labels = (listOfNotNull(default) + choices.map { it.value to it.label }).toMap()
-        ConnectedChoice(
-            options = options,
-            selected = selected,
-            onSelect = onSelect,
-            label = { stringResource(labels.getValue(it)) },
-            modifier = Modifier.padding(bottom = 12.dp),
-        )
+        // Miku-Picked UI: five pills in a row cut their labels short ("Defa", "Expa"), so more
+        // than four options wrap into rows of three.
+        val rows = if (options.size > 4) options.chunked(3) else listOf(options)
+        rows.forEachIndexed { i, row ->
+            ConnectedChoice(
+                options = row,
+                selected = selected,
+                onSelect = onSelect,
+                label = { stringResource(labels.getValue(it)) },
+                modifier = Modifier.padding(bottom = if (i == rows.lastIndex) 12.dp else 8.dp),
+            )
+        }
     }
 }

@@ -171,6 +171,7 @@ class LaboratoryActivity : ComponentActivity() {
                 ) { index ->
                     if (index == 0) {
                         LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
                             state = listStates[0],
                             contentPadding = listPadding,
                             verticalArrangement = Arrangement.spacedBy(12.dp),
