@@ -15,6 +15,7 @@ object Backends {
     val experiments: Set<String> =
         setOf(
             "back_to_app_indicator",
+            "qs_oneui_experimental",
         )
 
     /** PenguinOS power menu styles (SystemUI globalactions PowerMenuStyle, power_menu_style). */
