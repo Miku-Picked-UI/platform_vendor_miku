@@ -328,7 +328,7 @@ class StylesActivity : ComponentActivity() {
                         Triple(UdfpsPack.ANIMATION, udfpsAnimations, udfpsAnimation)
                             .takeIf { udfpsAnimations.isNotEmpty() },
                     )
-                if (udfps.isNotEmpty()) {
+                if (udfps.isNotEmpty() || Backends.SCREEN_OFF_UDFPS_ICON) {
                     item { SectionHeader(stringResource(R.string.styles_udfps_title)) }
                     item {
                         SegmentedGroup {

@@ -27,7 +27,7 @@ object Backends {
     const val POWER_MENU_STYLES = true
 
     /** Screen-off fingerprint icon and its schedule (SystemUI doze DozeUdfpsIconController). */
-    const val SCREEN_OFF_UDFPS_ICON = false
+    const val SCREEN_OFF_UDFPS_ICON = true
 
     /** Dual tone shade behind notifications (penguin_liquid_glass_dual_tone). */
     const val GLASS_DUAL_TONE = true
