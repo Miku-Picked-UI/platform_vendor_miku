@@ -213,10 +213,15 @@ class ExperimentsActivity : ComponentActivity() {
                         bottom = padding.calculateBottomPadding() + 24.dp,
                     )
             ) {
-                item { SectionHeader(stringResource(R.string.experiments_lock_screen)) }
-                item { Group(ExperimentsStore.lockScreen, states) }
-                item { SectionHeader(stringResource(R.string.experiments_system)) }
-                item { Group(ExperimentsStore.system, states) }
+                // Miku-Picked UI: a section with nothing ported yet is left out
+                if (ExperimentsStore.lockScreen.isNotEmpty()) {
+                    item { SectionHeader(stringResource(R.string.experiments_lock_screen)) }
+                    item { Group(ExperimentsStore.lockScreen, states) }
+                }
+                if (ExperimentsStore.system.isNotEmpty()) {
+                    item { SectionHeader(stringResource(R.string.experiments_system)) }
+                    item { Group(ExperimentsStore.system, states) }
+                }
             }
         }
     }
