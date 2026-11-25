@@ -123,12 +123,22 @@ object ExperimentsStore {
                 R.string.experiments_back_to_app_summary,
                 R.drawable.materialsymbols_ic_arrow_back_rounded_filled,
             ),
+            // Miku-Picked UI: off unless turned on here; PenguinOS always runs system apps' view
+            // animations on the render thread.
+            Experiment(
+                "penguin_luminous",
+                secure = true,
+                R.string.experiments_luminous,
+                R.string.experiments_luminous_summary,
+                R.drawable.materialsymbols_ic_animation_rounded_filled,
+            ),
             Experiment(
                 "penguin_luminous_all_apps",
                 secure = true,
                 R.string.experiments_luminous_all_apps,
                 R.string.experiments_luminous_all_apps_summary,
                 R.drawable.materialsymbols_ic_animation_rounded_filled,
+                dependsOn = "penguin_luminous",
             ),
             Experiment(
                 "recents_frequent_apps",

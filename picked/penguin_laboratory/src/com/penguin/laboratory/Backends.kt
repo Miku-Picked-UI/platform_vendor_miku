@@ -17,6 +17,8 @@ object Backends {
             "back_to_app_indicator",
             "qs_oneui_experimental",
             "recents_frequent_apps",
+            "penguin_luminous",
+            "penguin_luminous_all_apps",
         )
 
     /** PenguinOS power menu styles (SystemUI globalactions PowerMenuStyle, power_menu_style). */
