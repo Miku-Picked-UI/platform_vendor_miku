@@ -16,6 +16,10 @@ object Backends {
         setOf(
             "depth_wallpaper_floating",
             "ls_lock_icon_top",
+            "ls_now_bar",
+            "ls_now_bar_art",
+            "ls_media_expand",
+            "ls_media_motion_art",
             "back_to_app_indicator",
             "qs_oneui_experimental",
             "recents_frequent_apps",

@@ -231,15 +231,16 @@
     <string name="experiments_lock_screen">Lock screen</string>
     <string name="experiments_system">System</string>
     <string name="experiments_ls_now_bar">Now bar</string>
-    <string name="experiments_ls_now_bar_summary">Swipe the lock screen player down to fold it and the notifications into a pill and show the artwork</string>
+    <!-- Miku-Picked UI: on our own Now Bar -->
+    <string name="experiments_ls_now_bar_summary">Swipe the Now Bar\'s player down to fold the notifications away and show the artwork; swipe it up to bring them back</string>
     <string name="experiments_ls_now_bar_art">Show artwork when folded</string>
     <string name="experiments_ls_now_bar_art_summary">Fill the lock screen with the album art behind the now bar. Off, or pulled down again, the wallpaper shows instead</string>
     <string name="experiments_ls_lock_icon_top">Lock icon at the top</string>
     <string name="experiments_ls_lock_icon_top_summary">Show the padlock under the status bar and give its space to the lock screen content</string>
     <string name="experiments_ls_media_expand">iOS-style lock screen media art</string>
-    <string name="experiments_ls_media_expand_summary">Tap the lock screen player\'s artwork to fill the screen with it</string>
+    <string name="experiments_ls_media_expand_summary">Tap the artwork in the Now Bar\'s large player to fill the screen with it</string>
     <string name="experiments_ls_media_motion_art">Animated album art</string>
-    <string name="experiments_ls_media_motion_art_summary">Loop Apple Music\'s motion artwork in the expanded player</string>
+    <string name="experiments_ls_media_motion_art_summary">Loop Apple Music\'s motion artwork over the full screen art. Looks the song up on Apple Music</string>
     <string name="experiments_depth_floating">Floating depth wallpaper</string>
     <string name="experiments_depth_floating_summary">Float the lock screen clock between wallpaper and subject on tilt</string>
     <string name="experiments_qs_oneui">One UI Quick Settings</string>
