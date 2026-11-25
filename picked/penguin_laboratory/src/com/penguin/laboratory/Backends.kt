@@ -16,6 +16,7 @@ object Backends {
         setOf(
             "back_to_app_indicator",
             "qs_oneui_experimental",
+            "recents_frequent_apps",
         )
 
     /** PenguinOS power menu styles (SystemUI globalactions PowerMenuStyle, power_menu_style). */
