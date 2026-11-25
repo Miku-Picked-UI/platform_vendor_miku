@@ -15,6 +15,7 @@ object Backends {
     val experiments: Set<String> =
         setOf(
             "depth_wallpaper_floating",
+            "ls_lock_icon_top",
             "back_to_app_indicator",
             "qs_oneui_experimental",
             "recents_frequent_apps",

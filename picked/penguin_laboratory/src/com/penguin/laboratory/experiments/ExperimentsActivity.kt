@@ -79,7 +79,8 @@ object ExperimentsStore {
                 R.string.experiments_ls_lock_icon_top,
                 R.string.experiments_ls_lock_icon_top_summary,
                 R.drawable.materialsymbols_ic_layers_rounded_filled,
-                defaultOn = true,
+                // Miku-Picked UI: SystemUI keeps the stock place unless chosen
+                defaultOn = false,
             ),
             Experiment(
                 "ls_media_expand",
