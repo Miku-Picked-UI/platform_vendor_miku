@@ -12,7 +12,10 @@ package com.penguin.laboratory
  */
 object Backends {
     /** Experiments keys with a backend. */
-    val experiments: Set<String> = emptySet()
+    val experiments: Set<String> =
+        setOf(
+            "back_to_app_indicator",
+        )
 
     /** PenguinOS power menu styles (SystemUI globalactions PowerMenuStyle, power_menu_style). */
     const val POWER_MENU_STYLES = true
