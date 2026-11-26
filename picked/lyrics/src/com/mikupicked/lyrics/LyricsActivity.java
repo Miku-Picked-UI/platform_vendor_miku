@@ -63,6 +63,9 @@ public class LyricsActivity extends Activity {
     private String mPreferredPackage;
 
     private ImageView mBackground;
+    private View mTint;
+    private GradientDrawable mPlayCircle;
+    private int mAccent = Color.WHITE;
     private TextView mTitle;
     private TextView mArtist;
     private ScrollView mScroll;
@@ -158,8 +161,11 @@ public class LyricsActivity extends Activity {
         mBackground.setScaleType(ImageView.ScaleType.CENTER_CROP);
         mBackground.setRenderEffect(RenderEffect.createBlurEffect(dp(60), dp(60),
                 Shader.TileMode.CLAMP));
-        mBackground.setColorFilter(Color.argb(0x8C, 0, 0, 0));
         root.addView(mBackground, new FrameLayout.LayoutParams(-1, -1));
+        // Darkens the art, tinted with its own colour towards the top (see applyColors).
+        mTint = new View(this);
+        root.addView(mTint, new FrameLayout.LayoutParams(-1, -1));
+        applyColors(null);
 
         LinearLayout column = new LinearLayout(this);
         column.setOrientation(LinearLayout.VERTICAL);
@@ -224,10 +230,10 @@ public class LyricsActivity extends Activity {
         controls.setPadding(0, dp(8), 0, dp(12));
         ImageButton prev = button(R.drawable.ic_prev, R.string.lyrics_previous, 56);
         mPlayPause = button(R.drawable.ic_play, R.string.lyrics_play_pause, 72);
-        GradientDrawable circle = new GradientDrawable();
-        circle.setShape(GradientDrawable.OVAL);
-        circle.setColor(Color.argb(0x33, 0xFF, 0xFF, 0xFF));
-        mPlayPause.setBackground(circle);
+        mPlayCircle = new GradientDrawable();
+        mPlayCircle.setShape(GradientDrawable.OVAL);
+        mPlayCircle.setColor(Color.argb(0x33, 0xFF, 0xFF, 0xFF));
+        mPlayPause.setBackground(mPlayCircle);
         ImageButton next = button(R.drawable.ic_next, R.string.lyrics_next, 56);
         prev.setOnClickListener(v -> {
             if (mController != null) mController.getTransportControls().skipToPrevious();
@@ -334,6 +340,7 @@ public class LyricsActivity extends Activity {
         mTitle.setText("");
         mArtist.setText("");
         mBackground.setImageDrawable(null);
+        applyColors(null);
         setLines(null);
         mStatus.setText(R.string.lyrics_nothing_playing);
     }
@@ -355,6 +362,7 @@ public class LyricsActivity extends Activity {
         Bitmap art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART);
         if (art == null) art = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART);
         mBackground.setImageBitmap(art);
+        applyColors(art);
 
         if (TextUtils.isEmpty(title) || TextUtils.isEmpty(artist)) {
             mTrackKey = null;
@@ -427,6 +435,72 @@ public class LyricsActivity extends Activity {
         }
     }
 
+    // ---- Colours from the album art
+
+    /**
+     * Picks the art's most vivid colour (a small sample, weighted by saturation and brightness)
+     * and themes the page with it: a tinted wash over the blurred art, the current line and the
+     * play button. White and plain dark without art.
+     */
+    private void applyColors(Bitmap art) {
+        int accent = art != null ? vividColor(art) : 0;
+        mAccent = accent != 0 ? accent : Color.WHITE;
+        int top = accent != 0 ? withValue(accent, 0.35f, 0xC0) : Color.argb(0x99, 0, 0, 0);
+        GradientDrawable wash = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[] {top, Color.argb(0xA6, 0, 0, 0), Color.argb(0xD9, 0, 0, 0)});
+        mTint.setBackground(wash);
+        if (mPlayCircle != null) {
+            mPlayCircle.setColor(accent != 0 ? withValue(accent, 0.8f, 0x66)
+                    : Color.argb(0x33, 0xFF, 0xFF, 0xFF));
+        }
+        if (mCurrent >= 0 && mCurrent < mLineViews.size()) {
+            mLineViews.get(mCurrent).setTextColor(lineColor());
+        }
+    }
+
+    /** The current line: white with a touch of the art's colour, still easy to read. */
+    private int lineColor() {
+        if (mAccent == Color.WHITE) return Color.WHITE;
+        float[] hsv = new float[3];
+        Color.colorToHSV(mAccent, hsv);
+        hsv[1] = Math.min(hsv[1], 0.35f);
+        hsv[2] = 1f;
+        return Color.HSVToColor(hsv);
+    }
+
+    private static int withValue(int color, float value, int alpha) {
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        hsv[2] = Math.min(hsv[2], value);
+        return Color.HSVToColor(alpha, hsv);
+    }
+
+    /** 0 when the art has no colour worth using (greyscale). */
+    private static int vividColor(Bitmap art) {
+        Bitmap source = art;
+        if (art.getConfig() == Bitmap.Config.HARDWARE) {
+            source = art.copy(Bitmap.Config.ARGB_8888, false);
+            if (source == null) return 0;
+        }
+        Bitmap small = Bitmap.createScaledBitmap(source, 24, 24, true);
+        float[] hsv = new float[3];
+        float best = 0f;
+        int pick = 0;
+        for (int y = 0; y < small.getHeight(); y++) {
+            for (int x = 0; x < small.getWidth(); x++) {
+                int c = small.getPixel(x, y);
+                Color.colorToHSV(c, hsv);
+                if (hsv[2] < 0.2f) continue;
+                float score = hsv[1] * hsv[1] * (0.4f + hsv[2]);
+                if (score > best) {
+                    best = score;
+                    pick = c;
+                }
+            }
+        }
+        return best < 0.08f ? 0 : (pick | 0xFF000000);
+    }
+
     // ---- Following the song
 
     private boolean isPlaying() {
@@ -482,6 +556,7 @@ public class LyricsActivity extends Activity {
     }
 
     private void highlight(TextView view, boolean current) {
+        view.setTextColor(current ? lineColor() : Color.WHITE);
         view.animate()
                 .alpha(current ? 1f : DIM)
                 .scaleX(current ? CURRENT_SCALE : OTHER_SCALE)
