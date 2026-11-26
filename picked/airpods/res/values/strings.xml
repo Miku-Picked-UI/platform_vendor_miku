@@ -12,6 +12,10 @@
     <string name="pods_case">Case %1$d%%</string>
 
     <string name="pods_listening_mode">Listening mode</string>
+    <string name="pods_tile_label">AirPods</string>
+    <string name="pods_tile_disconnected">Not connected</string>
+    <!-- Quick Settings tile subtitle: listening mode, then the lowest bud battery -->
+    <string name="pods_tile_subtitle">%1$s · %2$d %%</string>
     <string name="pods_mode_off">Off</string>
     <string name="pods_mode_transparency">Transparency</string>
     <string name="pods_mode_adaptive">Adaptive</string>
