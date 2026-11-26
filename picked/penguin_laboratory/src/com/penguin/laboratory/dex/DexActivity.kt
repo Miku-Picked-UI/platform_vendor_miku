@@ -52,6 +52,8 @@ class DexActivity : ComponentActivity() {
     @Composable
     private fun Dex() {
         var enabled by remember { mutableStateOf(DexStore.isEnabled(this)) }
+        // Miku-Picked UI: turned on here, DeX may need a restart (frameworks PickedDexSync)
+        var turnedOn by remember { mutableStateOf(false) }
         val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
         Scaffold(
             modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -92,6 +94,7 @@ class DexActivity : ComponentActivity() {
                             onCheckedChange = {
                                 DexStore.setEnabled(this@DexActivity, it)
                                 enabled = it
+                                turnedOn = it
                             },
                             index = 0,
                             count = 1,
@@ -99,9 +102,14 @@ class DexActivity : ComponentActivity() {
                         )
                     }
                 }
-                // Miku-Picked UI: the dock, launchpad, Control Centre and touchpad come from the
-                // PenguinDex app, which this ROM doesn't have; a connected screen gets AOSP's
-                // desktop.
+                if (turnedOn) item {
+                    Text(
+                        stringResource(R.string.dex_restart_hint),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+                    )
+                }
                 if (Backends.DEX_DESKTOP_FEATURES) item { SectionHeader(stringResource(R.string.dex_features)) }
                 if (Backends.DEX_DESKTOP_FEATURES) item {
                     SegmentedGroup {
@@ -116,7 +124,7 @@ class DexActivity : ComponentActivity() {
                             R.drawable.materialsymbols_ic_touchpad_mouse_rounded_filled, enabled, 3)
                     }
                 }
-                if (Backends.DEX_DESKTOP_FEATURES) item {
+                if (Backends.DEX_PC) item {
                     Text(
                         stringResource(R.string.dex_pc_hint),
                         style = MaterialTheme.typography.bodyMedium,

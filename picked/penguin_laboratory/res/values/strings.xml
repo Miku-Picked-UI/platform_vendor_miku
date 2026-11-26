@@ -148,6 +148,7 @@
     <string name="dex_control_centre_summary">The status bar opens quick controls instead of the notification shade</string>
     <string name="dex_touchpad">Phone as touchpad</string>
     <string name="dex_touchpad_summary">Offer to move the desktop\'s pointer from your phone</string>
+    <string name="dex_restart_hint">If DeX has never been on, restart your phone to finish turning it on.</string>
     <string name="dex_pc_hint">On a Windows PC, turn on USB debugging and open the PenguinOS DeX app.</string>
 
     <!-- Liquid Glass -->

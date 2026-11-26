@@ -37,5 +37,8 @@ object Backends {
     const val GLASS_DUAL_TONE = true
 
     /** DeX dock, launchpad, Control Centre and touchpad (the PenguinDex app). */
-    const val DEX_DESKTOP_FEATURES = false
+    const val DEX_DESKTOP_FEATURES = true
+
+    /** DeX on a Windows PC (PenguinOS' PC app), not tried with this ROM. */
+    const val DEX_PC = false
 }
