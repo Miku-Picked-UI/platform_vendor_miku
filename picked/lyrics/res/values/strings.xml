@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-FileCopyrightText: 2026 Miku-Picked UI ; SPDX-License-Identifier: Apache-2.0 -->
+<resources>
+    <string name="lyrics_name">Lyrics</string>
+    <string name="lyrics_loading">Finding lyrics…</string>
+    <string name="lyrics_none">No lyrics found for this song</string>
+    <string name="lyrics_nothing_playing">Nothing is playing</string>
+    <string name="lyrics_unsynced">These lyrics aren\'t timed</string>
+    <string name="lyrics_source">Lyrics from lrclib.net</string>
+    <string name="lyrics_previous">Previous</string>
+    <string name="lyrics_play_pause">Play or pause</string>
+    <string name="lyrics_next">Next</string>
+    <string name="lyrics_close">Close</string>
+</resources>

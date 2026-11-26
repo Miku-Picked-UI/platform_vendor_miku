@@ -1,0 +1,29 @@
+//
+// SPDX-FileCopyrightText: 2026 Miku-Picked UI
+// SPDX-License-Identifier: Apache-2.0
+//
+// PickedLyrics: full-screen synced lyrics over the album art for whatever is playing
+// (Spotify included), from lrclib.net. Opened from SystemUI's Now Bar, also over the lock
+// screen. Follows the active media session, so it needs MEDIA_CONTENT_CONTROL (privileged).
+
+android_app {
+    name: "PickedLyrics",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    sdk_version: "system_current",
+    certificate: "platform",
+    privileged: true,
+    system_ext_specific: true,
+    required: ["privapp_permissions_com.mikupicked.lyrics"],
+    optimize: {
+        enabled: false,
+    },
+}
+
+prebuilt_etc {
+    name: "privapp_permissions_com.mikupicked.lyrics",
+    src: "privapp_permissions_com.mikupicked.lyrics.xml",
+    filename_from_src: true,
+    sub_dir: "permissions",
+    system_ext_specific: true,
+}

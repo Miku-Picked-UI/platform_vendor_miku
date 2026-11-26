@@ -116,6 +116,11 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     PickedPods
 
+# [Miku-Picked UI] Lyrics: full-screen synced lyrics (lrclib.net) over the album art for the
+# active player, Spotify included; opened from SystemUI's Now Bar, also on the lock screen
+PRODUCT_PACKAGES += \
+    PickedLyrics
+
 # [Miku-Picked UI] Speaker Calibrator: measures a speaker with the phone mic, writes an
 # AxionFx preset (picked/speaker_cal)
 PRODUCT_PACKAGES += \
